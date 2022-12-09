@@ -37,4 +37,4 @@ The bot will respond with a generated response based on the prompt you provided.
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](https://chat.openai.com/LICENSE) for details.
+This project is licensed under the MIT License. See [LICENSE](https://github.com/omgitsjan/DiscordBot/blob/main/LICENSE) for details.
