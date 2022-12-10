@@ -1,5 +1,5 @@
 
-# Discord Bot *(with OpenAI / ChatGPT feature)*
+# Discord Bot *(with OpenAI / ChatGPT & DALL-E feature)*
 
 This is a simple Discord bot that uses the OpenAI ChatGPT API to generate responses to messages in a Discord chat. The bot is written in C# and uses the [Discord.Net](https://github.com/discord-net/Discord.Net) library to interact with the Discord API and the [RestSharp](https://github.com/restsharp/RestSharp) library to make HTTP requests to the OpenAI API.
 
