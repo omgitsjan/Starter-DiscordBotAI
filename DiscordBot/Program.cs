@@ -25,8 +25,14 @@ public class Program
     /// <returns></returns>
     public static async Task MainAsync()
     {
+        //Creates a config with specified gateway intents
+        var config = new DiscordSocketConfig
+        {
+            GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
+        };
+
         // Create a new Discord client
-        var client = new DiscordSocketClient();
+        var client = new DiscordSocketClient(config);
 
         // Log messages to the console
         client.Log += Log;
@@ -51,24 +57,30 @@ public class Program
     /// <returns></returns>
     private static async Task HandleCommand(SocketMessage message)
     {
+        var success = true;
+
         // Check if the message starts with one of these commands
         switch (message.Content)
         {
-            case "!chat":
+            case { } chat when chat.StartsWith("!chat"):
                 await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
                     "Recived !chat command: " + message.Content));
-                await OpenAiService.ChatGpt(message);
+                success = await OpenAiService.ChatGpt(message);
                 break;
-            case "!image":
-                await OpenAiService.DallE(message);
+            case { } image when image.StartsWith("!image"):
                 await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
                     "Recived !image command: " + message.Content));
+                success = await OpenAiService.DallE(message);
                 break;
             default:
                 await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
-                    "No command found, just a normal message"));
+                    "No command found, normal message"));
                 break;
         }
+
+        if (!success)
+            await Log(new LogMessage(LogSeverity.Warning, nameof(HandleCommand),
+                "Error with one of the request to the Apis!"));
     }
 
     /// <summary>
