@@ -1,8 +1,8 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using OpenAI_Discord_Bot.Service;
+using DiscordBot.Service;
 
-namespace OpenAI_Discord_Bot;
+namespace DiscordBot;
 
 public class Program
 {
@@ -57,8 +57,38 @@ public class Program
     /// <returns></returns>
     private static async Task HandleCommand(SocketMessage message)
     {
-        // Check if the message starts with the !chat command
-        if (message.Content.StartsWith("!chat")) await OpenAiService.ChatGpt(message);
+        var success = true;
+        var responseText = string.Empty;
+
+        await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
+            "New Message incoming..."));
+
+        // Check if the message starts with one of these commands
+        switch (message.Content)
+        {
+            case { } chat when chat.StartsWith("!chat"):
+                await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
+                    "Recived !chat command: " + message.Content));
+                (success, responseText) = await OpenAiService.ChatGpt(message);
+                break;
+            case { } image when image.StartsWith("!image"):
+                await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
+                    "Recived !image command: " + message.Content));
+                (success, responseText) = await OpenAiService.DallE(message);
+                break;
+            default:
+                await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
+                    "No command found, normal message"));
+                break;
+        }
+
+        if (!success)
+            await Log(new LogMessage(LogSeverity.Warning, nameof(HandleCommand),
+                "Error with one of the request to the Apis!"));
+
+        if (!string.IsNullOrEmpty(responseText))
+            await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
+                "Respone: " + responseText));
     }
 
     /// <summary>
