@@ -29,7 +29,7 @@ public class OpenAiService
     /// </summary>
     /// <param name="message"></param>
     /// <returns>Boolean indicating whether the request was successful</returns>
-    internal static async Task<bool> ChatGpt(SocketMessage message)
+    internal static async Task<Tuple<bool, string>> ChatGpt(SocketMessage message)
     {
         // Create a new RestClient instance
         var client = new RestClient(ChatGptApiUrl);
@@ -59,24 +59,25 @@ public class OpenAiService
         var response = await client.ExecuteAsync(request);
 
         // Holds the response from the API.
-        string? responseText;
-        var success = false;
+        string responseText;
+        var success = true;
         // Check the status code of the response
         if (response.Content != null && response.StatusCode == HttpStatusCode.OK)
         {
             // Get the response text from the API
-            responseText = JsonConvert.DeserializeObject<dynamic>(response.Content)?["choices"][0]["text"];
-            success = true;
+            responseText = JsonConvert.DeserializeObject<dynamic>(response.Content)?["choices"][0]["text"] ??
+                           "Could not deserialize response from ChatGPT Api!";
         }
         else
         {
             // Get the ErrorMessage from the API
-            responseText = response.ErrorMessage;
+            responseText = response.ErrorMessage ?? string.Empty;
+            success = false;
         }
 
         // Send the response to the Discord chat
         await message.Channel.SendMessageAsync(responseText);
-        return success;
+        return new Tuple<bool, string>(success, responseText);
     }
 
     /// <summary>
@@ -85,7 +86,7 @@ public class OpenAiService
     /// </summary>
     /// <param name="message"></param>
     /// <returns>Boolean indicating whether the request was successful</returns>
-    internal static async Task<bool> DallE(SocketMessage message)
+    internal static async Task<Tuple<bool, string>> DallE(SocketMessage message)
     {
         // Create a new RestClient instance
         var client = new RestClient(DalleApiUrl);
@@ -116,7 +117,7 @@ public class OpenAiService
         var response = await client.ExecuteAsync(request);
 
         // Holds the response from the API.
-        string? responseText;
+        string responseText;
         var success = false;
         // Check the status code of the response
         if (response.Content != null && response.StatusCode == HttpStatusCode.OK)
@@ -129,11 +130,12 @@ public class OpenAiService
         else
         {
             // Get the ErrorMessage from the API
-            responseText = response.ErrorMessage;
+            responseText = response.ErrorMessage ?? string.Empty;
         }
 
         // Send the response to the Discord chat
         await message.Channel.SendMessageAsync(responseText);
-        return success;
+
+        return new Tuple<bool, string>(success, responseText);
     }
 }

@@ -58,6 +58,10 @@ public class Program
     private static async Task HandleCommand(SocketMessage message)
     {
         var success = true;
+        var responseText = string.Empty;
+
+        await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
+            "New Message incoming..."));
 
         // Check if the message starts with one of these commands
         switch (message.Content)
@@ -65,12 +69,12 @@ public class Program
             case { } chat when chat.StartsWith("!chat"):
                 await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
                     "Recived !chat command: " + message.Content));
-                success = await OpenAiService.ChatGpt(message);
+                (success, responseText) = await OpenAiService.ChatGpt(message);
                 break;
             case { } image when image.StartsWith("!image"):
                 await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
                     "Recived !image command: " + message.Content));
-                success = await OpenAiService.DallE(message);
+                (success, responseText) = await OpenAiService.DallE(message);
                 break;
             default:
                 await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
@@ -81,6 +85,10 @@ public class Program
         if (!success)
             await Log(new LogMessage(LogSeverity.Warning, nameof(HandleCommand),
                 "Error with one of the request to the Apis!"));
+
+        if (!string.IsNullOrEmpty(responseText))
+            await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
+                "Respone: " + responseText));
     }
 
     /// <summary>
