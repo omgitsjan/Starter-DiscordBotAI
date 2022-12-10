@@ -4,20 +4,31 @@ using Newtonsoft.Json;
 using RestSharp;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace OpenAI_Discord_Bot.Service;
+namespace DiscordBot.Service;
 
 public class OpenAiService
 {
     /// <summary>
-    ///     Api Key to access ChatGPT - (Replace this with your ChatGPT API key)
+    ///     Api Key to access OpenAi Apis like ChatGPT - (Replace this with your OpenAi API key)
     /// </summary>
-    private const string ChatGptApiKey = "";
+    private const string OpenAiApiKey = "";
 
     /// <summary>
     ///     Url to the ChatGpt Api
     /// </summary>
     private const string ChatGptApiUrl = "https://api.openai.com/v1/completions";
 
+    /// <summary>
+    ///     Url to the
+    /// </summary>
+    private const string DalleApiUrl = "https://api.openai.com/v1/images/generations";
+
+    /// <summary>
+    ///     The method uses the RestClient class to send a request to the ChatGPT API, passing the user's message as the
+    ///     prompt and sends the response into the Chat
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns>Boolean indicating whether the request was successful</returns>
     internal static async Task<bool> ChatGpt(SocketMessage message)
     {
         // Create a new RestClient instance
@@ -28,7 +39,7 @@ public class OpenAiService
 
         // Set the request headers
         request.AddHeader("Content-Type", "application/json");
-        request.AddHeader("Authorization", $"Bearer {ChatGptApiKey}");
+        request.AddHeader("Authorization", $"Bearer {OpenAiApiKey}");
 
         // Create the request data
         var data = new
@@ -55,6 +66,64 @@ public class OpenAiService
         {
             // Get the response text from the API
             responseText = JsonConvert.DeserializeObject<dynamic>(response.Content)?["choices"][0]["text"];
+            success = true;
+        }
+        else
+        {
+            // Get the ErrorMessage from the API
+            responseText = response.ErrorMessage;
+        }
+
+        // Send the response to the Discord chat
+        await message.Channel.SendMessageAsync(responseText);
+        return success;
+    }
+
+    /// <summary>
+    ///     The method uses the RestClient class to send a request to the Dall-E API, passing the user's message as the
+    ///     prompt and sends an image to the Chat
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns>Boolean indicating whether the request was successful</returns>
+    internal static async Task<bool> DallE(SocketMessage message)
+    {
+        // Create a new RestClient instance
+        var client = new RestClient(DalleApiUrl);
+
+        // Create a new RestRequest instance
+        var request = new RestRequest("", Method.Post);
+
+        // Set the request headers
+        request.AddHeader("Content-Type", "application/json");
+        request.AddHeader("Authorization", $"Bearer {OpenAiApiKey}");
+
+        // Create the request data
+        var data = new
+        {
+            // The prompt is everything after the !image command
+            //model = "image-alpha-001",
+            prompt = message.Content[5..],
+            n = 1,
+            size = "1024x1024"
+        };
+
+        var jsonData = JsonSerializer.Serialize(data);
+
+        // Add the request data to the request body
+        request.AddJsonBody(jsonData);
+
+        // Send the request and get the response
+        var response = await client.ExecuteAsync(request);
+
+        // Holds the response from the API.
+        string? responseText;
+        var success = false;
+        // Check the status code of the response
+        if (response.Content != null && response.StatusCode == HttpStatusCode.OK)
+        {
+            // Get the image URL from the API response
+            var imageUrl = JsonConvert.DeserializeObject<dynamic>(response.Content)?["data"][0]["url"];
+            responseText = $"Here is the generated image: {imageUrl}";
             success = true;
         }
         else

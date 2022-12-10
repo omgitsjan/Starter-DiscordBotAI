@@ -1,8 +1,8 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using OpenAI_Discord_Bot.Service;
+using DiscordBot.Service;
 
-namespace OpenAI_Discord_Bot;
+namespace DiscordBot;
 
 public class Program
 {
@@ -25,14 +25,8 @@ public class Program
     /// <returns></returns>
     public static async Task MainAsync()
     {
-        //Creates a config with specified gateway intents
-        var config = new DiscordSocketConfig
-        {
-            GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
-        };
-
         // Create a new Discord client
-        var client = new DiscordSocketClient(config);
+        var client = new DiscordSocketClient();
 
         // Log messages to the console
         client.Log += Log;
@@ -57,8 +51,24 @@ public class Program
     /// <returns></returns>
     private static async Task HandleCommand(SocketMessage message)
     {
-        // Check if the message starts with the !chat command
-        if (message.Content.StartsWith("!chat")) await OpenAiService.ChatGpt(message);
+        // Check if the message starts with one of these commands
+        switch (message.Content)
+        {
+            case "!chat":
+                await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
+                    "Recived !chat command: " + message.Content));
+                await OpenAiService.ChatGpt(message);
+                break;
+            case "!image":
+                await OpenAiService.DallE(message);
+                await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
+                    "Recived !image command: " + message.Content));
+                break;
+            default:
+                await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
+                    "No command found, just a normal message"));
+                break;
+        }
     }
 
     /// <summary>
