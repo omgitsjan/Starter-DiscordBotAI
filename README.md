@@ -29,17 +29,15 @@ Replace `DiscordToken` and `ChatGptApiKey` with your actual Discord bot token an
 
 To use the bot, send a message in the form of `!chat <message>` or `!image <message>` where `<message>` is the text you want the bot to generate a response for. For example:
 
-ChatGPT
+ChatGPT:
 
 `!chat What is the meaning of life?` 
 
-The bot will respond with a generated response based on the prompt you provided.
-
-DALL-E
+DALL-E:
 
 `!image Pixel art where monkeys trying to rob a bank`
 
-The bot will respond with a generated image response based on the prompt you provided.
+The bot will respond with a generated image/text response based on the prompt you provided.
 
 ## License
 
