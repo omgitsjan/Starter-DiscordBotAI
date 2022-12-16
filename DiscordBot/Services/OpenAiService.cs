@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using RestSharp;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace DiscordBot.Service;
+namespace DiscordBot.Services;
 
 public class OpenAiService
 {
