@@ -1,7 +1,8 @@
 ###
 # Place your Prettier ignore content here
 *.min.*
-DiscordBot/bin/Debug/
+*/bin/Debug/
+.github/workflows/
 
 ###
 # .gitignore content is duplicated here due to https://github.com/prettier/prettier/issues/8506
