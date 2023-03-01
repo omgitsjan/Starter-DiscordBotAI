@@ -30,11 +30,11 @@ To use the bot, send a message in the form of `!chat <message>` or `!image <mess
 
 ChatGPT:
 
-`!chat What is the meaning of life?`
+`/chatgpt What is the meaning of life?`
 
 DALL-E:
 
-`!image Pixel art where monkeys trying to rob a bank`
+`/dall-e Pixel art where monkeys trying to rob a bank`
 
 The bot will respond with a generated image/text response based on the prompt you provided.
 
