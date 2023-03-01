@@ -1,5 +1,4 @@
-
-# Discord Bot *(with OpenAI [ChatGPT & DALL-E])*
+# Discord Bot _(with OpenAI [ChatGPT & DALL-E])_
 
 This is a simple Discord bot that uses the OpenAI ChatGPT API to generate responses to messages in a Discord chat. The bot is written in C# and uses the [Discord.Net](https://github.com/discord-net/Discord.Net) library to interact with the Discord API and the [RestSharp](https://github.com/restsharp/RestSharp) library to make HTTP requests to the OpenAI API.
 
@@ -7,8 +6,8 @@ This is a simple Discord bot that uses the OpenAI ChatGPT API to generate respon
 
 To use this bot, you will need the following:
 
--   A Discord bot token
--   An OpenAI ChatGPT API key
+- A Discord bot token
+- An OpenAI ChatGPT API key
 
 Once you have these, you can clone this repository and build the project using the `dotnet` command, like this:
 
@@ -17,7 +16,7 @@ Copy code
 `git clone https://github.com/omgitsjan/DiscordBot
 cd DiscordBot
 dotnet restore
-dotnet build` 
+dotnet build`
 
 Next, you need to specify the environment variables for the Discord bot token and ChatGPT API key when starting the bot. For example:
 
@@ -29,13 +28,17 @@ Replace `DiscordToken` and `ChatGptApiKey` with your actual Discord bot token an
 
 To use the bot, send a message in the form of `!chat <message>` or `!image <message>` where `<message>` is the text you want the bot to generate a response for. For example:
 
+Ping:
+
+`/ping`
+
 ChatGPT:
 
-`!chat What is the meaning of life?` 
+`/chatgpt What is the meaning of life?`
 
 DALL-E:
 
-`!image Pixel art where monkeys trying to rob a bank`
+`/dall-e Pixel art where monkeys trying to rob a bank`
 
 The bot will respond with a generated image/text response based on the prompt you provided.
 

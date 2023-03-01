@@ -1,25 +1,24 @@
 ﻿using System.Net;
-using Discord.WebSocket;
 using Newtonsoft.Json;
 using RestSharp;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace DiscordBot.Service;
+namespace DiscordBot.Services;
 
 public class OpenAiService
 {
     /// <summary>
-    ///     Api Key to access OpenAi Apis like ChatGPT - (Replace this with your OpenAi API key)
+    ///     Api Key to access OpenAi Apis like ChatGPT - (REPLACE THIS WITH YOUR OPENAI API KEY)
     /// </summary>
     private const string OpenAiApiKey = "";
 
     /// <summary>
-    ///     Url to the ChatGpt Api
+    ///     Url to the ChatGPT Api (currently not excatly the ChatGPT API only the availble GPT-3 completion Api)
     /// </summary>
     private const string ChatGptApiUrl = "https://api.openai.com/v1/completions";
 
     /// <summary>
-    ///     Url to the
+    ///     Url to the Dall-E Api
     /// </summary>
     private const string DalleApiUrl = "https://api.openai.com/v1/images/generations";
 
@@ -29,7 +28,7 @@ public class OpenAiService
     /// </summary>
     /// <param name="message"></param>
     /// <returns>Boolean indicating whether the request was successful</returns>
-    internal static async Task<Tuple<bool, string>> ChatGpt(SocketMessage message)
+    internal static async Task<Tuple<bool, string>> ChatGpt(string message)
     {
         // Create a new RestClient instance
         var client = new RestClient(ChatGptApiUrl);
@@ -46,10 +45,11 @@ public class OpenAiService
         {
             // The prompt is everything after the !chat command
             model = "text-davinci-003",
-            prompt = message.Content[4..],
+            prompt = message,
             max_tokens = 256
         };
 
+        // Serialzie it via JsonSerializer
         var jsonData = JsonSerializer.Serialize(data);
 
         // Add the request data to the request body
@@ -75,8 +75,6 @@ public class OpenAiService
             success = false;
         }
 
-        // Send the response to the Discord chat
-        await message.Channel.SendMessageAsync(responseText);
         return new Tuple<bool, string>(success, responseText);
     }
 
@@ -86,7 +84,7 @@ public class OpenAiService
     /// </summary>
     /// <param name="message"></param>
     /// <returns>Boolean indicating whether the request was successful</returns>
-    internal static async Task<Tuple<bool, string>> DallE(SocketMessage message)
+    internal static async Task<Tuple<bool, string>> DallE(string message)
     {
         // Create a new RestClient instance
         var client = new RestClient(DalleApiUrl);
@@ -103,11 +101,12 @@ public class OpenAiService
         {
             // The prompt is everything after the !image command
             //model = "image-alpha-001",
-            prompt = message.Content[5..],
+            prompt = message,
             n = 1,
             size = "1024x1024"
         };
 
+        // Serialzie it via JsonSerializer
         var jsonData = JsonSerializer.Serialize(data);
 
         // Add the request data to the request body
@@ -132,9 +131,6 @@ public class OpenAiService
             // Get the ErrorMessage from the API
             responseText = response.ErrorMessage ?? string.Empty;
         }
-
-        // Send the response to the Discord chat
-        await message.Channel.SendMessageAsync(responseText);
 
         return new Tuple<bool, string>(success, responseText);
     }
