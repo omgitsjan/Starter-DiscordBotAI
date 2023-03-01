@@ -1,6 +1,12 @@
-﻿using Discord;
-using Discord.WebSocket;
-using DiscordBot.Service;
+
+using DiscordBot.Services;
+using DSharpPlus;
+using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
+using DSharpPlus.SlashCommands;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
 
 namespace DiscordBot;
 
@@ -11,94 +17,90 @@ public class Program
     /// </summary>
     private const string DiscordToken = "";
 
+    public DiscordClient? Client { get; private set; }
+
     /// <summary>
     ///     Init
     /// </summary>
-    private static void Main()
+    public static Task Main(string[] args)
     {
-        MainAsync().GetAwaiter().GetResult();
+        return new Program().MainAsync();
     }
 
     /// <summary>
     ///     Main Program
     /// </summary>
     /// <returns></returns>
-    public static async Task MainAsync()
+    public async Task MainAsync()
     {
-        //Creates a config with specified gateway intents
-        var config = new DiscordSocketConfig
+        await using var services = ConfigureServices();
+
+        // Create a new Discord client with specified gateway intents
+        var config = new DiscordConfiguration
         {
-            GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
+            Token = DiscordToken,
+            TokenType = TokenType.Bot,
+            Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMessages
         };
 
-        // Create a new Discord client
-        var client = new DiscordSocketClient(config);
+        // Creating the Discord Bot Client
+        Client = new DiscordClient(config);
+
+        // Configured the Slash Commands
+        var slashCommandsConfig = Client.UseSlashCommands();
+        slashCommandsConfig.RegisterCommands<SlashCommands>();
+
+
+        Client.UseInteractivity(new InteractivityConfiguration
+        {
+            Timeout = TimeSpan.FromMinutes(1)
+        });
 
         // Log messages to the console
-        client.Log += Log;
+        Log("omgitsjan/DiscordBot is running!", Client);
 
-        // Handle messages received
-        client.MessageReceived += HandleCommand;
-
-        // Login to Discord
-        await client.LoginAsync(TokenType.Bot, DiscordToken);
-
-        // Start the client
-        await client.StartAsync();
+        // Connect to Discord
+        await Client.ConnectAsync();
 
         // Block this program until it is closed
         await Task.Delay(-1);
     }
 
     /// <summary>
-    ///     This method is called whenever a message is received
-    /// </summary>
-    /// <param name="message"></param>
-    /// <returns></returns>
-    private static async Task HandleCommand(SocketMessage message)
-    {
-        var success = true;
-        var responseText = string.Empty;
-
-        await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
-            "New Message incoming..."));
-
-        // Check if the message starts with one of these commands
-        switch (message.Content)
-        {
-            case { } chat when chat.StartsWith("!chat"):
-                await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
-                    "Recived !chat command: " + message.Content));
-                (success, responseText) = await OpenAiService.ChatGpt(message);
-                break;
-            case { } image when image.StartsWith("!image"):
-                await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
-                    "Recived !image command: " + message.Content));
-                (success, responseText) = await OpenAiService.DallE(message);
-                break;
-            default:
-                await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
-                    "No command found, normal message"));
-                break;
-        }
-
-        if (!success)
-            await Log(new LogMessage(LogSeverity.Warning, nameof(HandleCommand),
-                "Error with one of the request to the Apis!"));
-
-        if (!string.IsNullOrEmpty(responseText))
-            await Log(new LogMessage(LogSeverity.Info, nameof(HandleCommand),
-                "Respone: " + responseText));
-    }
-
-    /// <summary>
     ///     This method logs messages to the console
     /// </summary>
     /// <param name="msg"></param>
+    /// <param name="client"></param>
     /// <returns></returns>
-    private static Task Log(LogMessage msg)
+    internal static void Log(string msg, BaseDiscordClient? client = null)
     {
-        Console.WriteLine(msg.ToString());
-        return Task.CompletedTask;
+        if (client != null)
+            client.Logger.LogInformation(msg);
+        else
+            Console.WriteLine(msg);
+    }
+
+    /// <summary>
+    ///     This method handles the ServiceCollection creation/configuration, and builds out the service provider we can call
+    ///     on later
+    /// </summary>
+    /// <returns></returns>
+    private static ServiceProvider ConfigureServices()
+    {
+        return new ServiceCollection()
+            .AddSingleton<SlashCommands>()
+            .BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <returns></returns>
+    private static bool IsDebug()
+    {
+#if DEBUG
+        return true;
+#else
+        return false;
+#endif
     }
 }
