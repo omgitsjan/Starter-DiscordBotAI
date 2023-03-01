@@ -28,6 +28,10 @@ Replace `DiscordToken` and `ChatGptApiKey` with your actual Discord bot token an
 
 To use the bot, send a message in the form of `!chat <message>` or `!image <message>` where `<message>` is the text you want the bot to generate a response for. For example:
 
+Ping:
+
+`/ping`
+
 ChatGPT:
 
 `/chatgpt What is the meaning of life?`
