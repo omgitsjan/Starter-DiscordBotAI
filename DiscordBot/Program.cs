@@ -1,12 +1,10 @@
-
-using DiscordBot.Services;
+﻿using DiscordBot.Services;
 using DSharpPlus;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
 
 namespace DiscordBot;
 
@@ -20,7 +18,7 @@ public class Program
     public DiscordClient? Client { get; private set; }
 
     /// <summary>
-    ///     Init
+    ///     Init Program
     /// </summary>
     public static Task Main(string[] args)
     {
