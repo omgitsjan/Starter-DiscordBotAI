@@ -15,7 +15,7 @@ public class OpenAiService
     /// <summary>
     ///     Url to the ChatGPT Api (currently not excatly the ChatGPT API only the availble GPT-3 completion Api)
     /// </summary>
-    private const string ChatGptApiUrl = "https://api.openai.com/v1/completions";
+    private const string ChatGptApiUrl = "https://api.openai.com/v1/chat/completions";
 
     /// <summary>
     ///     Url to the Dall-E Api
@@ -43,17 +43,17 @@ public class OpenAiService
         // Create the request data
         var data = new
         {
-            // The prompt with gpt-3.5-turbo (is the same model used in the ChatGPT)
+            // The prompt with model gpt-3.5-turbo
+            // (the same model used in ChatGPT)
             model = "gpt-3.5-turbo",
-            prompt = message,
-            max_tokens = 256
+            messages = new[] { new { role = "user", content = message } }
         };
 
         // Serialzie it via JsonSerializer
-        var jsonData = JsonSerializer.Serialize(data);
+        var jsonDataString = JsonConvert.SerializeObject(data);
 
         // Add the request data to the request body
-        request.AddJsonBody(jsonData);
+        request.AddJsonBody(jsonDataString);
 
         // Send the request and get the response
         var response = await client.ExecuteAsync(request);
@@ -65,17 +65,18 @@ public class OpenAiService
         if (response.Content != null && response.StatusCode == HttpStatusCode.OK)
         {
             // Get the response text from the API
-            responseText = JsonConvert.DeserializeObject<dynamic>(response.Content)?["choices"][0]["text"] ??
-                           "Could not deserialize response from ChatGPT Api!";
+            responseText =
+                JsonConvert.DeserializeObject<dynamic>(response.Content)?["choices"][0]["message"]["content"] ??
+                "Could not deserialize response from ChatGPT API!";
         }
         else
         {
             // Get the ErrorMessage from the API
-            responseText = response.ErrorMessage ?? string.Empty;
+            responseText = response.ErrorMessage ?? "Unknown error occurred";
             success = false;
         }
 
-        return new Tuple<bool, string>(success, responseText);
+        return new Tuple<bool, string>(success, responseText.TrimStart('\n'));
     }
 
     /// <summary>
