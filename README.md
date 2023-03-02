@@ -36,11 +36,11 @@ DALL-E:
 
 `/dall-e Pixel art where monkeys trying to rob a bank`
 
-Ping:
+The bot will respond with a generated image/text response based on the prompt you provided.
+
+Additional - Ping:
 
 `/ping`
-
-The bot will respond with a generated image/text response based on the prompt you provided.
 
 ## License
 
