@@ -43,8 +43,8 @@ public class OpenAiService
         // Create the request data
         var data = new
         {
-            // The prompt is everything after the !chat command
-            model = "text-davinci-003",
+            // The prompt with gpt-3.5-turbo (is the same model used in the ChatGPT)
+            model = "gpt-3.5-turbo",
             prompt = message,
             max_tokens = 256
         };
