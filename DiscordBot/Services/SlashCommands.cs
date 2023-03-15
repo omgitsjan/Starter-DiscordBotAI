@@ -29,7 +29,14 @@ internal class SlashCommands : ApplicationCommandModule
         var embedMessage = new DiscordEmbedBuilder
         {
             Title = "Pong!",
-            Description = $"Latency is: {reply.RoundtripTime} ms"
+            Description = $"Latency is: {reply.RoundtripTime} ms",
+            Url = "https://github.com/omgitsjan/DiscordBotAI",
+            Timestamp = DateTimeOffset.UtcNow,
+            Footer = new DiscordEmbedBuilder.EmbedFooter
+            {
+                Text = "omgitsjan/DiscordBot",
+                IconUrl = "https://avatars.githubusercontent.com/u/42674570?v=4"
+            }
         };
 
         // Sending the Embed Message to the Channel
@@ -46,7 +53,7 @@ internal class SlashCommands : ApplicationCommandModule
         string text)
     {
         // Creating a Message in the channel
-        await ctx.Channel.SendMessageAsync("Request from " + ctx.User.Username + ": " +
+        await ctx.Channel.SendMessageAsync("Request from " + ctx.User.Mention + ": " +
                                            text);
 
         // Starts the Response with a thinking state
@@ -66,6 +73,12 @@ internal class SlashCommands : ApplicationCommandModule
             {
                 Name = ctx.User.Username,
                 IconUrl = ctx.User.AvatarUrl
+            },
+            Footer = new DiscordEmbedBuilder.EmbedFooter
+            {
+                Text = "Powered by OpenAI",
+                IconUrl =
+                    "https://seeklogo.com/images/O/open-ai-logo-8B9BFEDC26-seeklogo.com.png"
             }
         };
 
@@ -86,7 +99,7 @@ internal class SlashCommands : ApplicationCommandModule
         string text)
     {
         // Send a message indicating that the command is being executed
-        await ctx.Channel.SendMessageAsync("Request from " + ctx.User.Username + " : " +
+        await ctx.Channel.SendMessageAsync("Request from " + ctx.User.Mention + " : " +
                                            text);
 
         // Send a "thinking" response to let the user know that the bot is working on their request
@@ -110,6 +123,12 @@ internal class SlashCommands : ApplicationCommandModule
             {
                 Name = ctx.User.Username,
                 IconUrl = ctx.User.AvatarUrl
+            },
+            Footer = new DiscordEmbedBuilder.EmbedFooter
+            {
+                Text = "Powered by OpenAI",
+                IconUrl =
+                    "https://seeklogo.com/images/O/open-ai-logo-8B9BFEDC26-seeklogo.com.png"
             }
         };
 
@@ -117,6 +136,55 @@ internal class SlashCommands : ApplicationCommandModule
         if (!sucess) Program.Log(message);
 
         // Send the embed message with the generated image to the channel
+        await ctx.Channel.SendMessageAsync(embedMessage);
+
+        // Deleting the thinking state
+        await ctx.DeleteResponseAsync();
+    }
+
+    [SlashCommand("Watch2Gether",
+        "Creates a room for you and your friends in Watch2Gether")]
+    public async Task Watch2GetherSlashCommand(InteractionContext ctx,
+        [Option("Video-URL", "Insert a Video-URL that should auto start after creating a Watch2Gether Room")]
+        string url = "")
+    {
+        // Send a message indicating that the command is being executed
+        await ctx.Channel.SendMessageAsync("Creating a Watch2Gether Room for " + ctx.User.Mention);
+
+        // Send a "thinking" response to let the user know that the bot is working on their request
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+            new DiscordInteractionResponseBuilder().WithContent("Sending create Room request to Watch2Gether API..."));
+
+        // Call CreateRoom in the Watch2GetherService to send a create room request to the Watch2Gether Api
+        var (sucess, message) = await Watch2GetherService.CreateRoom(url);
+
+        // Creates the Message that should display
+        var embedMessage = new DiscordEmbedBuilder
+        {
+            Title = "Watch2Gether Room!",
+            Description = $"This Room was created for you and is available under the following link: {message}",
+            Author = new DiscordEmbedBuilder.EmbedAuthor
+            {
+                Name = ctx.User.Username,
+                IconUrl = ctx.User.AvatarUrl
+            },
+            Footer = new DiscordEmbedBuilder.EmbedFooter
+            {
+                Text = "Watch2Gether",
+                IconUrl = "https://w2g.tv/assets/256.f5817612.png"
+            },
+            Timestamp = DateTimeOffset.UtcNow
+        };
+
+        // If the API request was not successful, log the error message
+        if (!sucess)
+        {
+            Program.Log(message);
+            embedMessage.Description = message;
+        }
+
+
+        // Sending the Embed Message to the Channel
         await ctx.Channel.SendMessageAsync(embedMessage);
 
         // Deleting the thinking state
