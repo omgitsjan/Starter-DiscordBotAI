@@ -11,7 +11,7 @@ namespace DiscordBot;
 public class Program
 {
     /// <summary>
-    ///     This is the Discord token from the bot - (Replace this with your Discord bot token)
+    ///     This is the Discord token from the bot - (REPLACE THIS WITH YOUR DISCORD BOT TOKEN)
     /// </summary>
     private const string DiscordToken = "";
 
