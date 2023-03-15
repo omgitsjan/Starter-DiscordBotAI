@@ -1,28 +1,30 @@
-# Discord Bot _with OpenAI (ChatGPT & DALL-E)_
 
-This is a simple Discord bot that uses the OpenAI ChatGPT API to generate responses to messages in a Discord chat. The bot is written in C# and uses the [DSharpPlus](https://github.com/DSharpPlus/DSharpPlus) library to interact with the Discord API and the [RestSharp](https://github.com/restsharp/RestSharp) library to make HTTP requests to the OpenAI API.
+# Discord Bot powered by OpenAI (ChatGPT, DALL-E and more)_
+
+This is a simple Discord bot that uses the OpenAI ChatGPT API to generate responses to messages in a Discord chat, also having some additional features. The bot is written in C# and uses the [DSharpPlus](https://github.com/DSharpPlus/DSharpPlus) library to interact with the Discord API and the [RestSharp](https://github.com/restsharp/RestSharp) library to make HTTP requests to the OpenAI API and for Example to the Watch2Gether API.
 
 ## Installation
 
-To use this bot, you will need the following:
+To fully use this bot, you will need the following:
 
 - A Discord bot token
 - An OpenAI ChatGPT API key
+-  An Watch2Gether API key
 
 Once you have these, you can clone this repository and build the project using the `dotnet` command, like this:
 
 Copy code
 
-`git clone https://github.com/omgitsjan/DiscordBot
+`git clone https://github.com/omgitsjan/DiscordBotAI
 cd DiscordBot
 dotnet restore
 dotnet build`
 
 Next, you need to specify the environment variables for the Discord bot token and ChatGPT API key when starting the bot. For example:
 
-Dont forget to change the static variables in Program.cs and OpenAiService.cs.
+Dont forget to change the static variables in Program.cs and OpenAiServiceService.cs and Watch2GetherService.cs.
 
-Replace `DiscordToken` and `ChatGptApiKey` with your actual Discord bot token and ChatGPT API key, respectively.
+Replace `DiscordToken`, `ChatGptApiKey` and `W2GApiKey` with your actual Discord bot token, ChatGPT API key and Watch2Gether API key, respectively.
 
 ## Usage
 
@@ -38,9 +40,20 @@ DALL-E:
 
 The bot will respond with a generated image/text response based on the prompt you provided.
 
-Additional - Ping:
+
+**Additional**
+
+*Watch2Gether:*
+
+`/watch2gether (optional)<video-url>`
+
+The bot will response with a link to a Watch2Gether Room with an optional Video as preload.
+
+Ping:
 
 `/ping`
+
+Retruns the Latency Pong...
 
 ## License
 
