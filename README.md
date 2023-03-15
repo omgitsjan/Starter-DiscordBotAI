@@ -1,5 +1,5 @@
 
-# Discord Bot powered by OpenAI (ChatGPT, DALL-E and more)_
+# Discord Bot powered by OpenAI _(ChatGPT, DALL-E and more)_
 
 This is a simple Discord bot that uses the OpenAI ChatGPT API to generate responses to messages in a Discord chat, also having some additional features. The bot is written in C# and uses the [DSharpPlus](https://github.com/DSharpPlus/DSharpPlus) library to interact with the Discord API and the [RestSharp](https://github.com/restsharp/RestSharp) library to make HTTP requests to the OpenAI API and for Example to the Watch2Gether API.
 
