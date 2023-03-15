@@ -8,12 +8,12 @@ namespace DiscordBot.Services;
 public class OpenAiService
 {
     /// <summary>
-    ///     Api Key to access OpenAi Apis like ChatGPT - (REPLACE THIS WITH YOUR OPENAI API KEY)
+    ///     Api Key to access OpenAi Apis like ChatGPT - (REPLACE THIS WITH YOUR API KEY)
     /// </summary>
     private const string OpenAiApiKey = "";
 
     /// <summary>
-    ///     Url to the ChatGPT Api (currently not excatly the ChatGPT API only the availble GPT-3 completion Api)
+    ///     Url to the ChatGPT Api
     /// </summary>
     private const string ChatGptApiUrl = "https://api.openai.com/v1/chat/completions";
 
@@ -27,7 +27,7 @@ public class OpenAiService
     ///     prompt and sends the response into the Chat
     /// </summary>
     /// <param name="message"></param>
-    /// <returns>Boolean indicating whether the request was successful</returns>
+    /// <returns>Boolean indicating whether the request was successful, also the message itself</returns>
     internal static async Task<Tuple<bool, string>> ChatGpt(string message)
     {
         // Create a new RestClient instance
@@ -84,7 +84,7 @@ public class OpenAiService
     ///     prompt and sends an image to the Chat
     /// </summary>
     /// <param name="message"></param>
-    /// <returns>Boolean indicating whether the request was successful</returns>
+    /// <returns>Boolean indicating whether the request was successful, also the message itself</returns>
     internal static async Task<Tuple<bool, string>> DallE(string message)
     {
         // Create a new RestClient instance
