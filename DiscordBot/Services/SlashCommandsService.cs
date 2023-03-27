@@ -190,4 +190,46 @@ internal class SlashCommands : ApplicationCommandModule
         // Deleting the thinking state
         await ctx.DeleteResponseAsync();
     }
+
+    [SlashCommand("Weather", "Get the current weather for the specified city")]
+    public async Task WeatherSlashCommand(InteractionContext ctx,
+        [Option("city", "The city you want to get the weather for")]
+        string city)
+    {
+        // Send a "thinking" response to let the user know that the bot is working on their request
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+            new DiscordInteractionResponseBuilder().WithContent("Fetching weather data..."));
+
+        // Call GetWeatherAsync to fetch the weather data for the specified city
+        var (success, message, weather) = await OpenWeatherMapService.GetWeatherAsync(city);
+
+        if (success)
+        {
+            var embedMessage = new DiscordEmbedBuilder
+            {
+                Title = $"Weather in {city} - {weather?.Temperature:F2}°C",
+                Description = message,
+                Author = new DiscordEmbedBuilder.EmbedAuthor
+                {
+                    Name = ctx.User.Username,
+                    IconUrl = ctx.User.AvatarUrl
+                },
+                Footer = new DiscordEmbedBuilder.EmbedFooter
+                {
+                    Text = "Weather data provided by OpenWeatherMap",
+                    IconUrl = "https://openweathermap.org/themes/openweathermap/assets/img/logo_white_cropped.png"
+                },
+                Timestamp = DateTimeOffset.UtcNow
+            };
+
+            await ctx.Channel.SendMessageAsync(embedMessage);
+        }
+        else
+        {
+            await ctx.Channel.SendMessageAsync(message);
+        }
+
+        // Deleting the thinking state
+        await ctx.DeleteResponseAsync();
+    }
 }
