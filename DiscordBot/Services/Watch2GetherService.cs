@@ -3,7 +3,7 @@ using RestSharp;
 
 namespace DiscordBot.Services;
 
-public class Watch2GetherService
+internal class Watch2GetherService
 {
     /// <summary>
     ///     Api Key to access Watch2Gether Api - (REPLACE THIS WITH YOUR KEY)
@@ -28,7 +28,7 @@ public class Watch2GetherService
     ///     A Tuple with two values - a boolean indicating whether the request was successful
     ///     and a string message containing either an error message or a Watch2Gether room URL.
     /// </returns>
-    public static async Task<Tuple<bool, string>> CreateRoom(string videoUrl)
+    internal static async Task<Tuple<bool, string>> CreateRoom(string videoUrl)
     {
         // Initialize a new instance of RestClient and empty message and success variables.
         var httpClient = new RestClient(W2GCreateRoomUrl);
