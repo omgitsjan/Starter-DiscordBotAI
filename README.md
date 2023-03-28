@@ -9,7 +9,8 @@ To fully use this bot, you will need the following:
 
 - A Discord bot token
 - An OpenAI ChatGPT API key
--  An Watch2Gether API key
+- An Watch2Gether API key
+- An OpenWeatherMap API key
 
 Once you have these, you can clone this repository and build the project using the `dotnet` command, like this:
 
@@ -24,17 +25,17 @@ Next, you need to specify the environment variables for the Discord bot token an
 
 Dont forget to change the static variables in Program.cs and OpenAiServiceService.cs and Watch2GetherService.cs.
 
-Replace `DiscordToken`, `ChatGptApiKey` and `W2GApiKey` with your actual Discord bot token, ChatGPT API key and Watch2Gether API key, respectively.
+Replace `DiscordToken`, `ChatGptApiKey`, `W2GApiKey` and `OpenWeatherMapApiKey` with your actual Discord bot token, ChatGPT API key and Watch2Gether API key, respectively.
 
 ## Usage
 
 To use the bot, send a message in the form of `/chatgpt <prompt>` or `/dall-e <prompt>` where `<prompt>` is the text you want the bot to generate a response for. For example:
 
-ChatGPT:
+*ChatGPT:*
 
 `/chatgpt What is the meaning of life?`
 
-DALL-E:
+*DALL-E:*
 
 `/dall-e Pixel art where monkeys trying to rob a bank`
 
@@ -49,7 +50,13 @@ The bot will respond with a generated image/text response based on the prompt yo
 
 The bot will response with a link to a Watch2Gether Room with an optional Video as preload.
 
-Ping:
+*OpenWeatherMap:*
+
+`/weather <city>`
+
+The bot will respond with the current Weather to a specific city.
+
+*Ping:*
 
 `/ping`
 
