@@ -88,7 +88,7 @@ public class Program
 
         // Set up the timer to change the status every 30 seconds
         var statusIndex = 0; // This variable helps us cycle through the different statuses
-        var timer = new Timer(15000); // Set the timer to execute every 15 seconds
+        var timer = new Timer(30000); // Set the timer to execute every 30 seconds
 
         timer.Elapsed += async (sender, e) =>
         {
@@ -96,7 +96,10 @@ public class Program
             {
                 case 0:
                     var currentBitcoinPrice = await GetCurrentBitcoinPriceAsync();
-                    var activity1 = new DiscordActivity($"BTC: ${currentBitcoinPrice}", ActivityType.Watching);
+                    var activity1 =
+                        new DiscordActivity(
+                            $"BTC: ${(currentBitcoinPrice.Length > 110 ? currentBitcoinPrice[..110] : currentBitcoinPrice)}",
+                            ActivityType.Watching);
                     await Client.UpdateStatusAsync(activity1);
                     break;
                 case 1:
@@ -105,7 +108,7 @@ public class Program
                         ActivityType.Watching));
                     break;
                 case 2:
-                    var currentDateTime = DateTime.UtcNow.ToString("HH:mm:ss");
+                    var currentDateTime = DateTime.UtcNow.ToString("HH:mm");
                     await Client.UpdateStatusAsync(new DiscordActivity($"Time: {currentDateTime} UTC",
                         ActivityType.Watching));
                     break;
@@ -117,7 +120,8 @@ public class Program
                     break;
                 case 4:
                     var developerExcuse = await GetRandomDeveloperExcuseAsync();
-                    await Client.UpdateStatusAsync(new DiscordActivity($"Excuse: {developerExcuse[..110]}",
+                    await Client.UpdateStatusAsync(new DiscordActivity(
+                        $"Excuse: {(developerExcuse.Length > 110 ? developerExcuse[..110] : developerExcuse)}",
                         ActivityType.ListeningTo));
                     break;
             }
@@ -153,9 +157,10 @@ public class Program
     private static async Task<string> GetRandomDeveloperExcuseAsync()
     {
         using var httpClient = new HttpClient();
-        var response = await httpClient.GetAsync("https://dev-excuses-api.herokuapp.com/");
-        var excuse = await response.Content.ReadAsStringAsync();
-        return excuse.Trim('"');
+        var response = await httpClient.GetAsync("https://api.devexcus.es/");
+        var jsonString = await response.Content.ReadAsStringAsync();
+        var json = JObject.Parse(jsonString);
+        return json["text"]?.Value<string>() ?? "Could not fetch current Developer excuse...";
     }
 
     /// <summary>
