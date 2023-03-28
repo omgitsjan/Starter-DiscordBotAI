@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -30,6 +31,19 @@ public class OpenAiService
     /// <returns>Boolean indicating whether the request was successful, also the message itself</returns>
     internal static async Task<Tuple<bool, string>> ChatGpt(string message)
     {
+        // Holds the response from the API.
+        string responseText;
+
+        // Use to indicate if the operation was successful or not
+        var success = false;
+
+        if (string.IsNullOrEmpty(OpenAiApiKey))
+        {
+            responseText = "No OpenAI Api Key was provided, please contact the Developer to add a valid Api Key!";
+            Program.Log($"{nameof(ChatGpt)}: " + responseText, LogLevel.Error);
+            return new Tuple<bool, string>(success, responseText.TrimStart('\n'));
+        }
+
         // Create a new RestClient instance
         var client = new RestClient(ChatGptApiUrl);
 
@@ -58,22 +72,26 @@ public class OpenAiService
         // Send the request and get the response
         var response = await client.ExecuteAsync(request);
 
-        // Holds the response from the API.
-        string responseText;
-        var success = true;
         // Check the status code of the response
         if (response.Content != null && response.StatusCode == HttpStatusCode.OK)
         {
             // Get the response text from the API
             responseText =
-                JsonConvert.DeserializeObject<dynamic>(response.Content)?["choices"][0]["message"]["content"] ??
-                "Could not deserialize response from ChatGPT API!";
+                JsonConvert.DeserializeObject<dynamic>(response.Content)?["choices"][0]["message"]["content"] ?? "";
+
+            if (string.IsNullOrEmpty(responseText))
+            {
+                responseText = "Could not deserialize response from ChatGPT API!";
+                Program.Log($"{nameof(ChatGpt)}: " + responseText, LogLevel.Error);
+            }
+
+            success = true;
         }
         else
         {
             // Get the ErrorMessage from the API
             responseText = response.ErrorMessage ?? "Unknown error occurred";
-            success = false;
+            Program.Log($"{nameof(ChatGpt)}: " + responseText, LogLevel.Error);
         }
 
         return new Tuple<bool, string>(success, responseText.TrimStart('\n'));
@@ -87,6 +105,19 @@ public class OpenAiService
     /// <returns>Boolean indicating whether the request was successful, also the message itself</returns>
     internal static async Task<Tuple<bool, string>> DallE(string message)
     {
+        // Holds the response from the API.
+        string responseText;
+
+        // Use to indicate if the operation was successful or not
+        var success = false;
+
+        if (string.IsNullOrEmpty(OpenAiApiKey))
+        {
+            responseText = "No OpenAI Api Key was provided, please contact the Developer to add a valid Api Key!";
+            Program.Log($"{nameof(DallE)}: " + responseText, LogLevel.Error);
+            return new Tuple<bool, string>(success, responseText.TrimStart('\n'));
+        }
+
         // Create a new RestClient instance
         var client = new RestClient(DalleApiUrl);
 
@@ -116,21 +147,34 @@ public class OpenAiService
         // Send the request and get the response
         var response = await client.ExecuteAsync(request);
 
-        // Holds the response from the API.
-        string responseText;
-        var success = false;
         // Check the status code of the response
         if (response.Content != null && response.StatusCode == HttpStatusCode.OK)
         {
             // Get the image URL from the API response
             var imageUrl = JsonConvert.DeserializeObject<dynamic>(response.Content)?["data"][0]["url"];
-            responseText = $"Here is the generated image: {imageUrl}";
+            responseText = $"Here is your generated image: {imageUrl}";
+
+            if (string.IsNullOrEmpty(imageUrl))
+            {
+                responseText = "Could not deserialize response from Dall-E API!";
+                Program.Log($"{nameof(DallE)}: " + responseText, LogLevel.Error);
+                return new Tuple<bool, string>(success, responseText);
+            }
+
+            // Log the successful API response
+            Program.Log(
+                $"{nameof(DallE)}: Received a successful response from the Dall-E API. Generated image URL: {imageUrl}");
             success = true;
         }
         else
         {
             // Get the ErrorMessage from the API
-            responseText = response.ErrorMessage ?? string.Empty;
+            responseText = response.ErrorMessage ?? "Unknown error occurred";
+
+            // Log the failed API response
+            Program.Log(
+                $"{nameof(DallE)}: Received a failed response from the Dall-E API. Error message: {responseText}",
+                LogLevel.Error);
         }
 
         return new Tuple<bool, string>(success, responseText);

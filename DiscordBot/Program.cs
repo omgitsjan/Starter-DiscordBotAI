@@ -8,6 +8,11 @@ using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using NLog;
+using NLog.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+using Timer = System.Timers.Timer;
 
 namespace DiscordBot;
 
@@ -19,6 +24,8 @@ public class Program
     private const string DiscordToken = "";
 
     public DiscordClient? Client { get; private set; }
+
+    public static ILogger? Logger { get; private set; }
 
     /// <summary>
     ///     Init Program
@@ -34,14 +41,28 @@ public class Program
     /// <returns></returns>
     public async Task MainAsync()
     {
+        // Configure NLog
+        LogManager.LoadConfiguration("nlog.config");
+
+        // Using decadency injection to configure all services
         await using var services = ConfigureServices();
+
+        Logger = services.GetService<ILogger<Program>>();
+
+        if (string.IsNullOrEmpty(DiscordToken))
+        {
+            Log("Discord token is empty. Please provide a valid token and restart the bot!", LogLevel.Error);
+            Environment.Exit(404);
+            return;
+        }
 
         // Create a new Discord client with specified gateway intents
         var config = new DiscordConfiguration
         {
             Token = DiscordToken,
             TokenType = TokenType.Bot,
-            Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMessages
+            Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMessages,
+            LoggerFactory = services.GetService<ILoggerFactory>()
         };
 
         // Creating the Discord Bot Client
@@ -58,14 +79,18 @@ public class Program
         });
 
         // Log messages to the console
-        Log("omgitsjan/DiscordBot is running!", Client);
+        Log("omgitsjan/DiscordBot is running!");
+
+        if (IsDebug()) Log("Debug Mode...", LogLevel.Debug);
 
         // Connect to Discord
         await Client.ConnectAsync();
 
         // Set up the timer to change the status every 30 seconds
         var statusIndex = 0; // This variable helps us cycle through the different statuses
-        var timer = new Timer(async _ =>
+        var timer = new Timer(15000); // Set the timer to execute every 15 seconds
+
+        timer.Elapsed += async (sender, e) =>
         {
             switch (statusIndex)
             {
@@ -75,29 +100,38 @@ public class Program
                     await Client.UpdateStatusAsync(activity1);
                     break;
                 case 1:
-                    var currentDateTime = DateTime.UtcNow.ToString("HH:mm:ss");
-                    var activity2 = new DiscordActivity($"Time: {currentDateTime} UTC", ActivityType.Watching);
-                    await Client.UpdateStatusAsync(activity2);
+                    var currentDate = DateTime.UtcNow.ToString("dd.MM.yyyy");
+                    await Client.UpdateStatusAsync(new DiscordActivity($"Date: {currentDate}",
+                        ActivityType.Watching));
                     break;
                 case 2:
-                    var uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime();
-                    var uptimeString = $"{uptime.Hours}h {uptime.Minutes}m {uptime.Seconds}s";
-                    var activity3 = new DiscordActivity($"Uptime: {uptimeString}", ActivityType.Watching);
-                    await Client.UpdateStatusAsync(activity3);
+                    var currentDateTime = DateTime.UtcNow.ToString("HH:mm:ss");
+                    await Client.UpdateStatusAsync(new DiscordActivity($"Time: {currentDateTime} UTC",
+                        ActivityType.Watching));
                     break;
                 case 3:
+                    var uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime();
+                    var uptimeString = $"{uptime.Hours}h {uptime.Minutes}m {uptime.Seconds}s";
+                    await Client.UpdateStatusAsync(
+                        new DiscordActivity($"Uptime: {uptimeString}", ActivityType.Watching));
+                    break;
+                case 4:
                     var developerExcuse = await GetRandomDeveloperExcuseAsync();
-                    var activity4 = new DiscordActivity($"Excuse: {developerExcuse}", ActivityType.Custom);
-                    await Client.UpdateStatusAsync(activity4);
+                    await Client.UpdateStatusAsync(new DiscordActivity($"Excuse: {developerExcuse[..110]}",
+                        ActivityType.ListeningTo));
                     break;
             }
 
-            statusIndex = (statusIndex + 1) % 4; // Cycle through the status options
-        }, null, (long)0, 15000); // Set the timer to execute every 15 seconds
+            statusIndex = (statusIndex + 1) % 5; // Cycle through the status options
+        };
+
+        timer.AutoReset = true;
+        timer.Enabled = true;
 
         // Block this program until it is closed
         await Task.Delay(-1);
     }
+
 
     /// <summary>
     ///     Gets the current Bitcion price from bybit public api
@@ -113,6 +147,7 @@ public class Program
     }
 
     /// <summary>
+    ///     Gets a random dev excuse from the open dev-excuses-api (herokuapp.com)
     /// </summary>
     /// <returns></returns>
     private static async Task<string> GetRandomDeveloperExcuseAsync()
@@ -127,12 +162,13 @@ public class Program
     ///     This method logs messages to the console
     /// </summary>
     /// <param name="msg"></param>
-    /// <param name="client"></param>
+    /// <param name="logLevel"></param>
     /// <returns></returns>
-    internal static void Log(string msg, BaseDiscordClient? client = null)
+    internal static void Log(string msg,
+        LogLevel logLevel = LogLevel.Information)
     {
-        if (client != null)
-            client.Logger.LogInformation(msg);
+        if (Logger != null)
+            Logger.Log(logLevel, msg);
         else
             Console.WriteLine(msg);
     }
@@ -146,12 +182,14 @@ public class Program
     {
         return new ServiceCollection()
             .AddSingleton<SlashCommands>()
+            .AddLogging(loggingBuilder => loggingBuilder.AddNLog())
             .BuildServiceProvider();
     }
 
     /// <summary>
+    ///     Check if the programm is running in Debug mode
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Boolean that indicates if the bot is running in Debug mode</returns>
     private static bool IsDebug()
     {
 #if DEBUG
