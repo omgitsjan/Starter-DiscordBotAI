@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using RestSharp;
 
 namespace DiscordBot.Services;
@@ -32,7 +33,7 @@ internal class Watch2GetherService
     {
         // Initialize a new instance of RestClient and empty message and success variables.
         var httpClient = new RestClient(W2GCreateRoomUrl);
-        var message = "Error: Unknown error occurred";
+        string message;
         var success = false;
 
         // Initialize a new instance of RestRequest with the Watch2Gether room creation URL and HTTP method.
@@ -52,7 +53,11 @@ internal class Watch2GetherService
 
         // If the response content is null, set the error message and return the result Tuple.
         if (string.IsNullOrEmpty(response.Content))
-            return new Tuple<bool, string>(success, "Error: No response from Watch2Gether");
+        {
+            message = "No response from Watch2Gether";
+            Program.Log($"{nameof(CreateRoom)}: " + message, LogLevel.Error);
+            return new Tuple<bool, string>(success, message);
+        }
 
         try
         {
@@ -64,8 +69,15 @@ internal class Watch2GetherService
         catch (Exception e)
         {
             // Log any deserialization exceptions to the console.
-            Console.WriteLine(e);
+            message = "Failed to deserialize response from Watch2Gether";
+            Program.Log($"{nameof(CreateRoom)}: " + message + $" Error: {e.Message}",
+                LogLevel.Error);
         }
+
+        if (success)
+            Program.Log($"{nameof(CreateRoom)}: Successfully created Watch2Gether room: {message}");
+        else
+            Program.Log($"{nameof(CreateRoom)}: Failed to create Watch2Gether room. Error: {message}", LogLevel.Error);
 
         // Return the result Tuple with success status and message.
         return new Tuple<bool, string>(success, message);

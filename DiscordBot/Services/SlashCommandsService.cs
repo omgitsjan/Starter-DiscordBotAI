@@ -44,6 +44,10 @@ internal class SlashCommands : ApplicationCommandModule
 
         // Deleting the thinking state
         await ctx.DeleteResponseAsync();
+
+        // Logging the success of the command with message and user details
+        Program.Log(
+            $"Command '{nameof(PingSlashCommand)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}).");
     }
 
     [SlashCommand("ChatGPT",
@@ -90,6 +94,10 @@ internal class SlashCommands : ApplicationCommandModule
 
         // Deleting the thinking state
         await ctx.DeleteResponseAsync();
+
+        // Logging the success of the command with message and user details
+        Program.Log(
+            $"Command '{nameof(ChatSlashCommand)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}). Input text: {text}");
     }
 
     [SlashCommand("DALL-E",
@@ -140,6 +148,10 @@ internal class SlashCommands : ApplicationCommandModule
 
         // Deleting the thinking state
         await ctx.DeleteResponseAsync();
+
+        // Logging the success of the command with message and user details
+        Program.Log(
+            $"Command '{nameof(ImageSlashCommand)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}). Input text: {text}");
     }
 
     [SlashCommand("Watch2Gether",
@@ -181,6 +193,8 @@ internal class SlashCommands : ApplicationCommandModule
         {
             Program.Log(message);
             embedMessage.Description = message;
+            Program.Log(
+                $"Command '{nameof(Watch2GetherSlashCommand)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}).");
         }
 
 
@@ -189,6 +203,11 @@ internal class SlashCommands : ApplicationCommandModule
 
         // Deleting the thinking state
         await ctx.DeleteResponseAsync();
+
+        // Logging the success of the command with message and user details
+        if (sucess)
+            Program.Log(
+                $"Command '{nameof(Watch2GetherSlashCommand)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}).");
     }
 
     [SlashCommand("Weather", "Get the current weather for the specified city")]
@@ -231,5 +250,10 @@ internal class SlashCommands : ApplicationCommandModule
 
         // Deleting the thinking state
         await ctx.DeleteResponseAsync();
+
+        // Logging the success of the command with message and user details
+        if (success)
+            Program.Log(
+                $"Command '{nameof(WeatherSlashCommand)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}). City: {city}");
     }
 }
