@@ -12,17 +12,18 @@
 ## Supported Versions
 
 We release patches for security vulnerabilities. Which versions are eligible for
-receiving such patches depends on the CVSS v3.1 Rating:
+receiving such patches depends on the CVSS v3.1 Rating (only the latest minor version):
 
-| CVSS v3.1 | Supported Versions |
-| --------- | ------------------ |
-| 2.x       | :white_check_mark: |
-| 1.x       | :x:                |
-| 0.x       | :x:                |
+| CVSS v3.1   | Supported Versions   |
+| ----------- | -------------------- |
+| 2.3.x       | :white_check_mark:   |
+| 2.x         | :x:                  |
+| 1.x         | :x:                  |
+| 0.x         | :x:                  |
 
 ## Reporting a Vulnerability
 
 Please report (suspected) security vulnerabilities to
 **[security@jpprofessionals.de](mailto:info@jpprofessionals.de)**. You will receive a response from
-us within 48 hours. If the issue is confirmed, we will release a patch as soon
+me within 72 hours. If the issue is confirmed, we will release a patch as soon
 as possible depending on complexity but historically within a few days.
