@@ -29,7 +29,7 @@ public class OpenWeatherMapServiceTests
         const int humidity = 76;
         const double windSpeed = 5.5;
         const string expectedMessage =
-            "In Berlin, the weather currently: light rain. The temperature is 10,55°C. The humidity is 76% and the wind speed is 5,5 m/s.";
+            "In Berlin, the weather currently: light rain. The temperature is 10,55\u00b0C. The humidity is 76% and the wind speed is 5,5 m/s.";
 
         var jsonResponse =
             "{\"name\": \"Berlin\",\"weather\": [{\"description\": \"light rain\",\"icon\": \"10n\"}],\"main\": {\"temp\": 10.55,\"feels_like\": 3.99,\"humidity\": 76},\"wind\": {\"speed\": 5.5}}";
