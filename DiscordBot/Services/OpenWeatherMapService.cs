@@ -9,16 +9,16 @@ namespace DiscordBot.Services;
 public class OpenWeatherMapService : IOpenWeatherMapService
 {
     /// <summary>
-    ///     Api Key to access OpenWeatherMap Api - (REPLACE THIS WITH YOUR API KEY)
-    /// </summary>
-    public string OpenWeatherMapApiKey = "";
-
-    /// <summary>
     ///     Url to the OpenWeatherMap Api
     /// </summary>
     private const string OpenWeatherMapUrl = "https://api.openweathermap.org/data/2.5/weather?q=";
 
     private readonly IRestClient _httpClient;
+
+    /// <summary>
+    ///     Api Key to access OpenWeatherMap Api - (REPLACE THIS WITH YOUR API KEY)
+    /// </summary>
+    public string OpenWeatherMapApiKey = "";
 
     public OpenWeatherMapService(IRestClient httpClient)
     {

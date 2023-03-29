@@ -8,15 +8,15 @@ namespace DiscordBotTests.ServiceTests;
 [TestFixture]
 public class Watch2GetherServiceTests
 {
-    private Watch2GetherService _watch2GetherService;
-    private Mock<IRestClient> _mockRestClient;
-
     [SetUp]
     public void Setup()
     {
         _mockRestClient = new Mock<IRestClient>();
         _watch2GetherService = new Watch2GetherService(_mockRestClient.Object);
     }
+
+    private Watch2GetherService _watch2GetherService;
+    private Mock<IRestClient> _mockRestClient;
 
     [Test]
     public async Task CreateRoom_SuccessfulRequest_ReturnsSuccessAndRoomUrl()
