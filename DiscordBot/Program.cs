@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using DiscordBot.Interfaces;
 using DiscordBot.Services;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using NLog;
 using NLog.Extensions.Logging;
+using RestSharp;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 using Timer = System.Timers.Timer;
@@ -69,8 +71,11 @@ public class Program
         Client = new DiscordClient(config);
 
         // Configured the Slash Commands
-        var slashCommandsConfig = Client.UseSlashCommands();
-        slashCommandsConfig.RegisterCommands<SlashCommands>();
+        var slashCommandsConfig = Client.UseSlashCommands(new SlashCommandsConfiguration
+        {
+            Services = services
+        });
+        slashCommandsConfig.RegisterCommands<SlashCommandsService>();
 
 
         Client.UseInteractivity(new InteractivityConfiguration
@@ -88,7 +93,7 @@ public class Program
 
         // Set up the timer to change the status every 30 seconds
         var statusIndex = 0; // This variable helps us cycle through the different statuses
-        var timer = new Timer(30000); // Set the timer to execute every 30 seconds
+        var timer = new Timer(15000); // Set the timer to execute every 30 seconds
 
         timer.Elapsed += async (sender, e) =>
         {
@@ -119,14 +124,24 @@ public class Program
                         new DiscordActivity($"Uptime: {uptimeString}", ActivityType.Watching));
                     break;
                 case 4:
+                    var memberCount = Client.Guilds.Sum(g => g.Value.MemberCount);
+                    await Client.UpdateStatusAsync(new DiscordActivity(
+                        $"Available to '{memberCount}' Users", ActivityType.Watching));
+                    break;
+                case 5:
                     var developerExcuse = await GetRandomDeveloperExcuseAsync();
                     await Client.UpdateStatusAsync(new DiscordActivity(
                         $"Excuse: {(developerExcuse.Length > 110 ? developerExcuse[..110] : developerExcuse)}",
                         ActivityType.ListeningTo));
                     break;
+                case 6:
+                    await Client.UpdateStatusAsync(new DiscordActivity(
+                        "omgitsjan/DiscordBotAI | JPProfessionals.de",
+                        ActivityType.Watching));
+                    break;
             }
 
-            statusIndex = (statusIndex + 1) % 5; // Cycle through the status options
+            statusIndex = (statusIndex + 1) % 7; // Cycle through the status options
         };
 
         timer.AutoReset = true;
@@ -141,7 +156,7 @@ public class Program
     ///     Gets the current Bitcion price from bybit public api
     /// </summary>
     /// <returns>The current price from bitcoin as BTCUSD string</returns>
-    private static async Task<string> GetCurrentBitcoinPriceAsync()
+    public static async Task<string> GetCurrentBitcoinPriceAsync()
     {
         using var httpClient = new HttpClient();
         var response = await httpClient.GetAsync("https://api.bybit.com/v2/public/tickers?symbol=BTCUSD");
@@ -154,7 +169,7 @@ public class Program
     ///     Gets a random dev excuse from the open dev-excuses-api (herokuapp.com)
     /// </summary>
     /// <returns></returns>
-    private static async Task<string> GetRandomDeveloperExcuseAsync()
+    public static async Task<string> GetRandomDeveloperExcuseAsync()
     {
         using var httpClient = new HttpClient();
         var response = await httpClient.GetAsync("https://api.devexcus.es/");
@@ -186,7 +201,10 @@ public class Program
     private static ServiceProvider ConfigureServices()
     {
         return new ServiceCollection()
-            .AddSingleton<SlashCommands>()
+            .AddSingleton<IWatch2GetherService, Watch2GetherService>()
+            .AddSingleton<IOpenWeatherMapService, OpenWeatherMapService>()
+            .AddSingleton<IRestClient>(_ => new RestClient())
+            .AddSingleton<SlashCommandsService>()
             .AddLogging(loggingBuilder => loggingBuilder.AddNLog())
             .BuildServiceProvider();
     }

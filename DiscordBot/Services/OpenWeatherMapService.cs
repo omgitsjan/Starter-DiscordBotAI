@@ -1,22 +1,31 @@
-﻿using DiscordBot.Models;
+﻿using DiscordBot.Interfaces;
+using DiscordBot.Models;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using RestSharp;
 
 namespace DiscordBot.Services;
 
-internal class OpenWeatherMapService
+public class OpenWeatherMapService : IOpenWeatherMapService
 {
     /// <summary>
     ///     Api Key to access OpenWeatherMap Api - (REPLACE THIS WITH YOUR API KEY)
     /// </summary>
-    private const string OpenWeatherMapApiKey = "";
+    public string OpenWeatherMapApiKey = "";
 
     /// <summary>
     ///     Url to the OpenWeatherMap Api
     /// </summary>
     private const string OpenWeatherMapUrl = "https://api.openweathermap.org/data/2.5/weather?q=";
 
-    internal static async Task<(bool Success, string Message, WeatherData? weatherData)> GetWeatherAsync(string city)
+    private readonly IRestClient _httpClient;
+
+    public OpenWeatherMapService(IRestClient httpClient)
+    {
+        _httpClient = httpClient;
+    }
+
+    public async Task<(bool Success, string Message, WeatherData? weatherData)> GetWeatherAsync(string city)
     {
         if (string.IsNullOrEmpty(OpenWeatherMapApiKey))
         {
@@ -31,8 +40,15 @@ internal class OpenWeatherMapService
         var requestUrl =
             $"{OpenWeatherMapUrl}{Uri.EscapeDataString(city)}&units=metric&appid={OpenWeatherMapApiKey}";
 
-        using var httpClient = new HttpClient();
-        var response = await httpClient.GetAsync(requestUrl);
+        // Initialize a new instance of RestRequest with the Watch2Gether room creation URL and HTTP method.
+        var request = new RestRequest("", Method.Post)
+        {
+            Resource = requestUrl
+        };
+
+        // Send the HTTP request asynchronously and await the response.
+        var response = await _httpClient.ExecuteAsync(request);
+
 
         if (!response.IsSuccessStatusCode)
         {
@@ -42,18 +58,16 @@ internal class OpenWeatherMapService
                 null);
         }
 
-        var jsonString = await response.Content.ReadAsStringAsync();
-        var json = JObject.Parse(jsonString);
+        var jsonString = response.Content;
+        var json = JObject.Parse(jsonString ?? "");
 
         var weather = new WeatherData
         {
             City = json["name"]?.Value<string>(),
             Description = json["weather"]?[0]?["description"]?.Value<string>(),
             Temperature = json["main"]?["temp"]?.Value<double>(),
-            FeelsLike = json["main"]?["feels_like"]?.Value<double>(),
             Humidity = json["main"]?["humidity"]?.Value<int>(),
-            WindSpeed = json["wind"]?["speed"]?.Value<double>(),
-            WeatherIcon = json["weather"]?[0]?["icon"]?.Value<string>()
+            WindSpeed = json["wind"]?["speed"]?.Value<double>()
         };
 
         var message =
