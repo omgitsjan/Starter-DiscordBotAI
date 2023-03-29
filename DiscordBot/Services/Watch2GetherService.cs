@@ -1,10 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using DiscordBot.Interfaces;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
 
 namespace DiscordBot.Services;
 
-internal class Watch2GetherService
+public class Watch2GetherService : IWatch2GetherService
 {
     /// <summary>
     ///     Api Key to access Watch2Gether Api - (REPLACE THIS WITH YOUR KEY)
@@ -14,12 +15,19 @@ internal class Watch2GetherService
     /// <summary>
     ///     Url to the CreateRoom Api
     /// </summary>
-    private const string W2GCreateRoomUrl = "https://api.w2g.tv/rooms/create.json";
+    internal const string W2GCreateRoomUrl = "https://api.w2g.tv/rooms/create.json";
 
     /// <summary>
     ///     Url to the Room URL
     /// </summary>
     private const string W2GShowRoomUrl = "https://w2g.tv/rooms/";
+
+    private readonly IRestClient _httpClient;
+
+    public Watch2GetherService(IRestClient httpClient)
+    {
+        _httpClient = httpClient;
+    }
 
     /// <summary>
     ///     Creates a Watch2Gether room for sharing a video.
@@ -29,10 +37,9 @@ internal class Watch2GetherService
     ///     A Tuple with two values - a boolean indicating whether the request was successful
     ///     and a string message containing either an error message or a Watch2Gether room URL.
     /// </returns>
-    internal static async Task<Tuple<bool, string>> CreateRoom(string videoUrl)
+    public async Task<Tuple<bool, string>> CreateRoom(string videoUrl)
     {
         // Initialize a new instance of RestClient and empty message and success variables.
-        var httpClient = new RestClient(W2GCreateRoomUrl);
         string message;
         var success = false;
 
@@ -48,8 +55,10 @@ internal class Watch2GetherService
             share = videoUrl
         });
 
+        request.Resource = W2GCreateRoomUrl;
+
         // Send the HTTP request asynchronously and await the response.
-        var response = await httpClient.ExecuteAsync(request);
+        var response = await _httpClient.ExecuteAsync(request);
 
         // If the response content is null, set the error message and return the result Tuple.
         if (string.IsNullOrEmpty(response.Content))
