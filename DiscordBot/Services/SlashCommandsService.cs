@@ -1,13 +1,23 @@
 ﻿using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
+using DiscordBot.Interfaces;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 
 namespace DiscordBot.Services;
 
-internal class SlashCommands : ApplicationCommandModule
+internal class SlashCommandsService : ApplicationCommandModule
 {
+    private readonly IWatch2GetherService _watch2GetherService;
+    private readonly IOpenWeatherMapService _openWeatherMapService;
+
+    public SlashCommandsService(IWatch2GetherService watch2GetherService, IOpenWeatherMapService openWeatherMapService)
+    {
+        _watch2GetherService = watch2GetherService;
+        _openWeatherMapService = openWeatherMapService;
+    }
+
     [SlashCommand("ping",
         "This is a basic ping command to check if the Bot is online and what the current Latency is")]
     public async Task PingSlashCommand(InteractionContext ctx)
@@ -168,7 +178,7 @@ internal class SlashCommands : ApplicationCommandModule
             new DiscordInteractionResponseBuilder().WithContent("Sending create Room request to Watch2Gether API..."));
 
         // Call CreateRoom in the Watch2GetherService to send a create room request to the Watch2Gether Api
-        var (sucess, message) = await Watch2GetherService.CreateRoom(url);
+        var (sucess, message) = await _watch2GetherService.CreateRoom(url);
 
         // Creates the Message that should display
         var embedMessage = new DiscordEmbedBuilder
@@ -220,7 +230,7 @@ internal class SlashCommands : ApplicationCommandModule
             new DiscordInteractionResponseBuilder().WithContent("Fetching weather data..."));
 
         // Call GetWeatherAsync to fetch the weather data for the specified city
-        var (success, message, weather) = await OpenWeatherMapService.GetWeatherAsync(city);
+        var (success, message, weather) = await _openWeatherMapService.GetWeatherAsync(city);
 
         if (success)
         {
