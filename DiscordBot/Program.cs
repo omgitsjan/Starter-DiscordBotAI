@@ -8,7 +8,6 @@ using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using NLog;
 using NLog.Extensions.Logging;
 using RestSharp;
@@ -28,6 +27,7 @@ public class Program
     public DiscordClient? Client { get; private set; }
 
     public static ILogger? Logger { get; private set; }
+    public static IHelperService? HelperService { get; private set; }
 
     /// <summary>
     ///     Init Program
@@ -50,6 +50,16 @@ public class Program
         await using var services = ConfigureServices();
 
         Logger = services.GetService<ILogger<Program>>();
+        HelperService = services.GetService<IHelperService>();
+
+        if (HelperService == null || Logger == null)
+        {
+            Log(
+                "Not all Services could be loaded. Please check the code or open a Issue on Github via omgitsjan/DiscordBotAI!",
+                LogLevel.Critical);
+            Environment.Exit(500);
+            return;
+        }
 
         if (string.IsNullOrEmpty(DiscordToken))
         {
@@ -100,7 +110,7 @@ public class Program
             switch (statusIndex)
             {
                 case 0:
-                    var currentBitcoinPrice = await GetCurrentBitcoinPriceAsync();
+                    var currentBitcoinPrice = await HelperService.GetCurrentBitcoinPriceAsync();
                     var activity1 =
                         new DiscordActivity(
                             $"BTC: ${(currentBitcoinPrice.Length > 110 ? currentBitcoinPrice[..110] : currentBitcoinPrice)}",
@@ -129,7 +139,7 @@ public class Program
                         $"Available to '{memberCount}' Users", ActivityType.Watching));
                     break;
                 case 5:
-                    var developerExcuse = await GetRandomDeveloperExcuseAsync();
+                    var developerExcuse = await HelperService.GetRandomDeveloperExcuseAsync();
                     await Client.UpdateStatusAsync(new DiscordActivity(
                         $"Excuse: {(developerExcuse.Length > 110 ? developerExcuse[..110] : developerExcuse)}",
                         ActivityType.ListeningTo));
@@ -149,33 +159,6 @@ public class Program
 
         // Block this program until it is closed
         await Task.Delay(-1);
-    }
-
-
-    /// <summary>
-    ///     Gets the current Bitcion price from bybit public api
-    /// </summary>
-    /// <returns>The current price from bitcoin as BTCUSD string</returns>
-    public static async Task<string> GetCurrentBitcoinPriceAsync()
-    {
-        using var httpClient = new HttpClient();
-        var response = await httpClient.GetAsync("https://api.bybit.com/v2/public/tickers?symbol=BTCUSD");
-        var jsonString = await response.Content.ReadAsStringAsync();
-        var json = JObject.Parse(jsonString);
-        return json["result"]?[0]?["last_price"]?.Value<string>() ?? "Could not fetch current Bitcoin price...";
-    }
-
-    /// <summary>
-    ///     Gets a random dev excuse from the open dev-excuses-api (herokuapp.com)
-    /// </summary>
-    /// <returns></returns>
-    public static async Task<string> GetRandomDeveloperExcuseAsync()
-    {
-        using var httpClient = new HttpClient();
-        var response = await httpClient.GetAsync("https://api.devexcus.es/");
-        var jsonString = await response.Content.ReadAsStringAsync();
-        var json = JObject.Parse(jsonString);
-        return json["text"]?.Value<string>() ?? "Could not fetch current Developer excuse...";
     }
 
     /// <summary>
@@ -203,6 +186,7 @@ public class Program
         return new ServiceCollection()
             .AddSingleton<IWatch2GetherService, Watch2GetherService>()
             .AddSingleton<IOpenWeatherMapService, OpenWeatherMapService>()
+            .AddSingleton<IHelperService, HelperService>()
             .AddSingleton<IRestClient>(_ => new RestClient())
             .AddSingleton<SlashCommandsService>()
             .AddLogging(loggingBuilder => loggingBuilder.AddNLog())

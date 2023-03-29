@@ -7,15 +7,18 @@ using DSharpPlus.SlashCommands;
 
 namespace DiscordBot.Services;
 
-internal class SlashCommandsService : ApplicationCommandModule
+public class SlashCommandsService : ApplicationCommandModule
 {
-    private readonly IWatch2GetherService _watch2GetherService;
+    private readonly IOpenAiService _openAiService;
     private readonly IOpenWeatherMapService _openWeatherMapService;
+    private readonly IWatch2GetherService _watch2GetherService;
 
-    public SlashCommandsService(IWatch2GetherService watch2GetherService, IOpenWeatherMapService openWeatherMapService)
+    public SlashCommandsService(IWatch2GetherService watch2GetherService, IOpenWeatherMapService openWeatherMapService,
+        IOpenAiService openAiService)
     {
         _watch2GetherService = watch2GetherService;
         _openWeatherMapService = openWeatherMapService;
+        _openAiService = openAiService;
     }
 
     [SlashCommand("ping",
@@ -75,7 +78,7 @@ internal class SlashCommandsService : ApplicationCommandModule
             new DiscordInteractionResponseBuilder().WithContent("Sending Request to ChatGPT API..."));
 
         // Execute and waiting for the response from our Method
-        var (success, message) = await OpenAiService.ChatGpt(text);
+        var (success, message) = await _openAiService.ChatGpt(text);
 
         // Creating embed Message via DiscordEmbedBuilder
         var embedMessage = new DiscordEmbedBuilder
@@ -125,7 +128,7 @@ internal class SlashCommandsService : ApplicationCommandModule
             new DiscordInteractionResponseBuilder().WithContent("Sending Request to DALL-E API..."));
 
         // Execute the DALL-E API request and wait for a response
-        var (sucess, message) = await OpenAiService.DallE(text);
+        var (sucess, message) = await _openAiService.DallE(text);
 
         // Extract the image URL from the response message using a regular expression
         var url = Regex.Match(message, @"http(s)?://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?").ToString();
