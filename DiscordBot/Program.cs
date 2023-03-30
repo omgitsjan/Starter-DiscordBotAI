@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using DiscordBot.Interfaces;
 using DiscordBot.Services;
+using DiscordBot.Wrapper;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
@@ -85,7 +86,7 @@ public class Program
         {
             Services = services
         });
-        slashCommandsConfig.RegisterCommands<SlashCommandsService>();
+        slashCommandsConfig.RegisterCommands<SlashCommands>();
 
 
         Client.UseInteractivity(new InteractivityConfiguration
@@ -186,9 +187,12 @@ public class Program
         return new ServiceCollection()
             .AddSingleton<IWatch2GetherService, Watch2GetherService>()
             .AddSingleton<IOpenWeatherMapService, OpenWeatherMapService>()
+            .AddSingleton<IOpenAiService, OpenAiService>()
             .AddSingleton<IHelperService, HelperService>()
+            .AddSingleton<IInteractionContextWrapper, InteractionContextWrapper>()
+            .AddSingleton<ISlashCommandsService, SlashCommandsService>()
+            .AddSingleton<SlashCommands>()
             .AddSingleton<IRestClient>(_ => new RestClient())
-            .AddSingleton<SlashCommandsService>()
             .AddLogging(loggingBuilder => loggingBuilder.AddNLog())
             .BuildServiceProvider();
     }

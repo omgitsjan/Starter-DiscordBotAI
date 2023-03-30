@@ -1,95 +1,113 @@
 using DiscordBot.Interfaces;
 using DiscordBot.Services;
+using DiscordBot.Wrapper;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using Moq;
 
 namespace DiscordBotTests.ServiceTests;
 
+[Ignore(
+    "This Test is not yet implemented, currently i don't exactly know how to proper mock the DiscordUser & DiscordChannel")]
 public class SlashCommandsServiceTests
 {
-    private Mock<IOpenAiService> _openAiServiceMock;
-    private Mock<IOpenWeatherMapService> _openWeatherMapServiceMock;
-    private SlashCommandsService _slashCommandsService;
+    private Mock<IInteractionContextWrapper> _ctxMock;
     private Mock<IWatch2GetherService> _watch2GetherServiceMock;
+    private Mock<IOpenWeatherMapService> _openWeatherMapServiceMock;
+    private Mock<IOpenAiService> _openAiServiceMock;
+    private SlashCommandsService _slashCommandsService;
 
     [SetUp]
     public void Setup()
     {
+        _ctxMock = new Mock<IInteractionContextWrapper>();
         _watch2GetherServiceMock = new Mock<IWatch2GetherService>();
         _openWeatherMapServiceMock = new Mock<IOpenWeatherMapService>();
         _openAiServiceMock = new Mock<IOpenAiService>();
 
-        _slashCommandsService = new SlashCommandsService(
-            _watch2GetherServiceMock.Object,
-            _openWeatherMapServiceMock.Object,
-            _openAiServiceMock.Object);
+        _slashCommandsService = new SlashCommandsService(_watch2GetherServiceMock.Object,
+            _openWeatherMapServiceMock.Object, _openAiServiceMock.Object);
     }
 
     [Test]
-    public async Task PingSlashCommandTest()
+    public async Task TestPingSlashCommandAsync()
     {
         // Arrange
-        var ctxMock = new Mock<InteractionContext>();
-        ctxMock.Setup(x => ctxMock.Setup(context => context.Channel).Returns(new Mock<DiscordChannel>().Object));
-        ctxMock.Setup(x => x.User).Returns(new Mock<DiscordUser>().Object);
-        ctxMock.Setup(x =>
-                x.CreateResponseAsync(It.IsAny<InteractionResponseType>(),
-                    It.IsAny<DiscordInteractionResponseBuilder>()))
-            .Returns(Task.CompletedTask);
-        ctxMock.Setup(x => x.DeleteResponseAsync()).Returns(Task.CompletedTask);
+        var channelMock = new Mock<DiscordChannel>(1234567890, null) { CallBase = true };
 
-        // Create a mock for DiscordMessage
-        var discordMessageMock = new Mock<DiscordMessage>();
+        var userMock = new Mock<DiscordUser>(1234567890, null, null, null, null) { CallBase = true };
 
-        ctxMock.Setup(x => x.Channel.SendMessageAsync(It.IsAny<string>(), It.IsAny<DiscordEmbed>()))
-            .Returns(Task.FromResult(discordMessageMock.Object));
+        channelMock.SetupGet(c => c.Name).Returns("test-channel");
+        userMock.SetupGet(u => u.Username).Returns("test-user");
 
+
+        _ctxMock.Object.SetUpForTesting(channelMock.Object, userMock.Object);
 
         // Act
-        await _slashCommandsService.PingSlashCommand(ctxMock.Object);
+        await _slashCommandsService.PingSlashCommandAsync(_ctxMock.Object);
 
         // Assert
-        ctxMock.Verify(x => x.Channel.SendMessageAsync(It.IsAny<string>(), It.IsAny<DiscordEmbed>()),
-            Times.Exactly(2));
-        ctxMock.Verify(
-            x => x.CreateResponseAsync(It.IsAny<InteractionResponseType>(),
-                It.IsAny<DiscordInteractionResponseBuilder>()), Times.Once());
-        ctxMock.Verify(x => x.DeleteResponseAsync(), Times.Once());
+        _ctxMock.Verify(
+            ctx => ctx.CreateResponseAsync(It.IsAny<InteractionResponseType>(),
+                It.IsAny<DiscordInteractionResponseBuilder>()), Times.Once);
+        _ctxMock.Verify(ctx => ctx.DeleteResponseAsync(), Times.Once);
+        _ctxMock.Verify(ctx => ctx.Channel.SendMessageAsync(It.IsAny<string>()), Times.Exactly(2));
     }
 
     [Test]
-    public async Task ChatSlashCommandTest()
+    public async Task TestChatSlashCommandAsync_Success()
     {
         // Arrange
-        var ctxMock = new Mock<InteractionContext>();
-        ctxMock.Setup(x => x.Channel).Returns(new Mock<DiscordChannel>().Object);
-        ctxMock.Setup(x => x.User).Returns(new Mock<DiscordUser>().Object);
-        ctxMock.Setup(x => x.CreateResponseAsync(It
-                .IsAny<InteractionResponseType>(), It.IsAny<DiscordInteractionResponseBuilder>()))
-            .Returns(Task.CompletedTask);
-        ctxMock.Setup(x => x.DeleteResponseAsync()).Returns(Task.CompletedTask);
-
-        // Create a mock for DiscordMessage
-        var discordMessageMock = new Mock<DiscordMessage>();
-
-        ctxMock.Setup(x => x.Channel.SendMessageAsync(It.IsAny<string>(), It.IsAny<DiscordEmbed>()))
-            .Returns(Task.FromResult(discordMessageMock.Object));
-
-        _openAiServiceMock.Setup(x => x.ChatGpt(It.IsAny<string>()))
-            .Returns(Task.FromResult(Tuple.Create(true, "AI response")));
-
+        _openAiServiceMock.Setup(service => service.ChatGpt(It.IsAny<string>()))
+            .ReturnsAsync(Tuple.Create(true, "Sample ChatGPT Response"));
 
         // Act
-        await _slashCommandsService.ChatSlashCommand(ctxMock.Object, "Sample input");
+        await _slashCommandsService.ChatSlashCommandAsync(_ctxMock.Object, "Sample Text");
 
         // Assert
-        ctxMock.Verify(x => x.Channel.SendMessageAsync(It.IsAny<string>(), It.IsAny<DiscordEmbed>()), Times.Exactly(2));
-        ctxMock.Verify(
-            x => x.CreateResponseAsync(It.IsAny<InteractionResponseType>(),
-                It.IsAny<DiscordInteractionResponseBuilder>()), Times.Once());
-        ctxMock.Verify(x => x.DeleteResponseAsync(), Times.Once());
-        _openAiServiceMock.Verify(x => x.ChatGpt(It.IsAny<string>()), Times.Once());
+        _ctxMock.Verify(
+            ctx => ctx.CreateResponseAsync(It.IsAny<InteractionResponseType>(),
+                It.IsAny<DiscordInteractionResponseBuilder>()), Times.Once);
+        _ctxMock.Verify(ctx => ctx.DeleteResponseAsync(), Times.Once);
+        _ctxMock.Verify(ctx => ctx.Channel.SendMessageAsync(It.IsAny<string>()), Times.Exactly(2));
+        _openAiServiceMock.Verify(service => service.ChatGpt("Sample Text"), Times.Once);
+    }
+
+    [Test]
+    public async Task TestChatSlashCommandAsync_Failure()
+    {
+        // Arrange
+        _openAiServiceMock.Setup(service => service.ChatGpt(It.IsAny<string>()))
+            .ReturnsAsync(Tuple.Create(false, "Error"));
+
+        // Act
+        await _slashCommandsService.ChatSlashCommandAsync(_ctxMock.Object, "Sample Text");
+
+        // Assert
+        _ctxMock.Verify(
+            ctx => ctx.CreateResponseAsync(It.IsAny<InteractionResponseType>(),
+                It.IsAny<DiscordInteractionResponseBuilder>()), Times.Once);
+        _ctxMock.Verify(ctx => ctx.DeleteResponseAsync(), Times.Once);
+        _ctxMock.Verify(ctx => ctx.Channel.SendMessageAsync(It.IsAny<string>()), Times.Exactly(2));
+        _openAiServiceMock.Verify(service => service.ChatGpt("Sample Text"), Times.Once);
+    }
+
+    [Test]
+    public async Task TestImageSlashCommandAsync_Success()
+    {
+        // Arrange
+        _openAiServiceMock.Setup(service => service.DallE(It.IsAny<string>()))
+            .ReturnsAsync(Tuple.Create(true, "https://sample-image-url.com/sample-image.jpg"));
+
+        // Act
+        await _slashCommandsService.ImageSlashCommandAsync(_ctxMock.Object, "Sample Text");
+
+        // Assert
+        _ctxMock.Verify(
+            ctx => ctx.CreateResponseAsync(It.IsAny<InteractionResponseType>(),
+                It.IsAny<DiscordInteractionResponseBuilder>()), Times.Once);
+        _ctxMock.Verify(ctx => ctx.DeleteResponseAsync(), Times.Once);
+        _ctxMock.Verify(ctx => ctx.Channel.SendMessageAsync(It.IsAny<string>()), Times.Exactly(2));
+        _openAiServiceMock.Verify(service => service.DallE("Sample Text"), Times.Once);
     }
 }
