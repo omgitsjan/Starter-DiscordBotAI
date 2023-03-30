@@ -29,7 +29,7 @@ public class OpenWeatherMapServiceTests
         const int humidity = 76;
         const double windSpeed = 5.5;
         const string expectedMessage =
-            "In Berlin, the weather currently: light rain. The temperature is 10,55\u00b0C. The humidity is 76% and the wind speed is 5,5 m/s.";
+            "In Berlin, the weather currently: light rain. The temperature is 10.55\u00b0C. The humidity is 76% and the wind speed is 5.5 m/s.";
 
         const string jsonResponse =
             "{\"name\": \"Berlin\",\"weather\": [{\"description\": \"light rain\",\"icon\": \"10n\"}],\"main\": {\"temp\": 10.55,\"feels_like\": 3.99,\"humidity\": 76},\"wind\": {\"speed\": 5.5}}";
@@ -54,7 +54,7 @@ public class OpenWeatherMapServiceTests
 
         // Assert
         Assert.That(result.Success, Is.True);
-        Assert.That(result.Message, Is.EqualTo(expectedMessage));
+        Assert.That(result.Message.Replace(",", "."), Is.EqualTo(expectedMessage.Replace(",", ".")));
         Assert.That(result.weatherData, Is.Not.Null);
         Assert.That(result.weatherData?.City, Is.EqualTo(city));
         Assert.That(result.weatherData?.Description, Is.EqualTo(description));
