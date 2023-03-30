@@ -1,13 +1,13 @@
 ﻿using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using DiscordBot.Interfaces;
+using DiscordBot.Wrapper;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 
 namespace DiscordBot.Services;
 
-public class SlashCommandsService : ApplicationCommandModule
+public class SlashCommandsService : ISlashCommandsService
 {
     private readonly IOpenAiService _openAiService;
     private readonly IOpenWeatherMapService _openWeatherMapService;
@@ -21,9 +21,7 @@ public class SlashCommandsService : ApplicationCommandModule
         _openAiService = openAiService;
     }
 
-    [SlashCommand("ping",
-        "This is a basic ping command to check if the Bot is online and what the current Latency is")]
-    public async Task PingSlashCommand(InteractionContext ctx)
+    public async Task PingSlashCommandAsync(IInteractionContextWrapper ctx)
     {
         // Creating the ping to measure response time
         var pinger = new Ping();
@@ -60,14 +58,10 @@ public class SlashCommandsService : ApplicationCommandModule
 
         // Logging the success of the command with message and user details
         Program.Log(
-            $"Command '{nameof(PingSlashCommand)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}).");
+            $"Command '{nameof(PingSlashCommandAsync)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}).");
     }
 
-    [SlashCommand("ChatGPT",
-        "Send a custom Text to the OpenAI - ChatGPT API and get a response from their AI based on your input")]
-    public async Task ChatSlashCommand(InteractionContext ctx,
-        [Option("prompt", "Write an input that the ChatGPT AI should respond to")]
-        string text)
+    public async Task ChatSlashCommandAsync(IInteractionContextWrapper ctx, string text)
     {
         // Creating a Message in the channel
         await ctx.Channel.SendMessageAsync("Request from " + ctx.User.Mention + ": " +
@@ -110,14 +104,10 @@ public class SlashCommandsService : ApplicationCommandModule
 
         // Logging the success of the command with message and user details
         Program.Log(
-            $"Command '{nameof(ChatSlashCommand)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}). Input text: {text}");
+            $"Command '{nameof(ChatSlashCommandAsync)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}). Input text: {text}");
     }
 
-    [SlashCommand("DALL-E",
-        "Send a custom Text to the OpenAI - DALL-E Api and get a generated Image based on input")]
-    public async Task ImageSlashCommand(InteractionContext ctx,
-        [Option("prompt", "Write a Text on how the generated Image should look like")]
-        string text)
+    public async Task ImageSlashCommandAsync(IInteractionContextWrapper ctx, string text)
     {
         // Send a message indicating that the command is being executed
         await ctx.Channel.SendMessageAsync("Request from " + ctx.User.Mention + " : " +
@@ -164,14 +154,10 @@ public class SlashCommandsService : ApplicationCommandModule
 
         // Logging the success of the command with message and user details
         Program.Log(
-            $"Command '{nameof(ImageSlashCommand)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}). Input text: {text}");
+            $"Command '{nameof(ImageSlashCommandAsync)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}). Input text: {text}");
     }
 
-    [SlashCommand("Watch2Gether",
-        "Creates a room for you and your friends in Watch2Gether")]
-    public async Task Watch2GetherSlashCommand(InteractionContext ctx,
-        [Option("Video-URL", "Insert a Video-URL that should auto start after creating a Watch2Gether Room")]
-        string url = "")
+    public async Task Watch2GetherSlashCommandAsync(IInteractionContextWrapper ctx, string url)
     {
         // Send a message indicating that the command is being executed
         await ctx.Channel.SendMessageAsync("Creating a Watch2Gether Room for " + ctx.User.Mention);
@@ -207,7 +193,7 @@ public class SlashCommandsService : ApplicationCommandModule
             Program.Log(message);
             embedMessage.Description = message;
             Program.Log(
-                $"Command '{nameof(Watch2GetherSlashCommand)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}).");
+                $"Command '{nameof(Watch2GetherSlashCommandAsync)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}).");
         }
 
 
@@ -220,13 +206,10 @@ public class SlashCommandsService : ApplicationCommandModule
         // Logging the success of the command with message and user details
         if (sucess)
             Program.Log(
-                $"Command '{nameof(Watch2GetherSlashCommand)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}).");
+                $"Command '{nameof(Watch2GetherSlashCommandAsync)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}).");
     }
 
-    [SlashCommand("Weather", "Get the current weather for the specified city")]
-    public async Task WeatherSlashCommand(InteractionContext ctx,
-        [Option("city", "The city you want to get the weather for")]
-        string city)
+    public async Task WeatherSlashCommandAsync(IInteractionContextWrapper ctx, string city)
     {
         // Send a "thinking" response to let the user know that the bot is working on their request
         await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
@@ -267,6 +250,6 @@ public class SlashCommandsService : ApplicationCommandModule
         // Logging the success of the command with message and user details
         if (success)
             Program.Log(
-                $"Command '{nameof(WeatherSlashCommand)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}). City: {city}");
+                $"Command '{nameof(WeatherSlashCommandAsync)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}). City: {city}");
     }
 }

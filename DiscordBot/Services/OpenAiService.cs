@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using DiscordBot.Interfaces;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
@@ -6,7 +7,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace DiscordBot.Services;
 
-public class OpenAiService
+public class OpenAiService : IOpenAiService
 {
     /// <summary>
     ///     Url to the ChatGPT Api
