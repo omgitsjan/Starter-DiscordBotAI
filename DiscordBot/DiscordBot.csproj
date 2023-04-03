@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -23,7 +23,7 @@
     <PackageReference Include="DSharpPlus.SlashCommands" Version="4.4.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="5.2.2" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.2.3" />
     <PackageReference Include="RestSharp" Version="109.0.1" />
   </ItemGroup>
 
