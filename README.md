@@ -8,7 +8,7 @@ This is a simple Discord bot that uses the OpenAI ChatGPT API to generate respon
 To fully use this bot, you will need the following:
 
 - A Discord bot token
-- An OpenAI ChatGPT API key
+- An OpenAI API key
 - An Watch2Gether API key
 - An OpenWeatherMap API key
 
