@@ -7,6 +7,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog;
@@ -21,13 +22,23 @@ namespace DiscordBot;
 public class Program
 {
     /// <summary>
-    ///     This is the Discord token from the bot - (REPLACE THIS WITH YOUR DISCORD BOT TOKEN)
+    ///     This is the Discord token from the bot
     /// </summary>
-    private const string DiscordToken = "";
+    private string? _discordToken;
 
+    /// <summary>
+    ///     The DiscordClient instance used for connecting to and interacting with Discord
+    /// </summary>
     public DiscordClient? Client { get; private set; }
 
+    /// <summary>
+    ///     The ILogger instance used for logging messages
+    /// </summary>
     public static ILogger? Logger { get; private set; }
+
+    /// <summary>
+    ///     The IHelperService instance used for various helper functions
+    /// </summary>
     public static IHelperService? HelperService { get; private set; }
 
     /// <summary>
@@ -47,8 +58,14 @@ public class Program
         // Configure NLog
         LogManager.LoadConfiguration("nlog.config");
 
+        // Load the configuration from the appsettings.json file
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .Build();
+
         // Using decadency injection to configure all services
-        await using var services = ConfigureServices();
+        await using ServiceProvider services = ConfigureServices(configuration);
 
         Logger = services.GetService<ILogger<Program>>();
         HelperService = services.GetService<IHelperService>();
@@ -62,17 +79,21 @@ public class Program
             return;
         }
 
-        if (string.IsNullOrEmpty(DiscordToken))
+        // Retrieve the Discord token from the configuration
+        _discordToken = configuration["DiscordBot:Token"] ?? string.Empty;
+
+        if (string.IsNullOrEmpty(_discordToken))
         {
-            Log("Discord token is empty. Please provide a valid token and restart the bot!", LogLevel.Error);
+            Log("Could not load Discord token. Please check if a valid token was provided and restart the bot!",
+                LogLevel.Error);
             Environment.Exit(404);
             return;
         }
 
         // Create a new Discord client with specified gateway intents
-        var config = new DiscordConfiguration
+        DiscordConfiguration config = new()
         {
-            Token = DiscordToken,
+            Token = _discordToken,
             TokenType = TokenType.Bot,
             Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMessages,
             LoggerFactory = services.GetService<ILoggerFactory>()
@@ -106,41 +127,41 @@ public class Program
         var statusIndex = 0; // This variable helps us cycle through the different statuses
         var timer = new Timer(15000); // Set the timer to execute every 30 seconds
 
-        timer.Elapsed += async (sender, e) =>
+        timer.Elapsed += async (_, _) =>
         {
             switch (statusIndex)
             {
                 case 0:
-                    var currentBitcoinPrice = await HelperService.GetCurrentBitcoinPriceAsync();
-                    var activity1 =
-                        new DiscordActivity(
+                    string currentBitcoinPrice = await HelperService.GetCurrentBitcoinPriceAsync();
+                    DiscordActivity activity1 =
+                        new(
                             $"BTC: ${(currentBitcoinPrice.Length > 110 ? currentBitcoinPrice[..110] : currentBitcoinPrice)}",
                             ActivityType.Watching);
                     await Client.UpdateStatusAsync(activity1);
                     break;
                 case 1:
-                    var currentDate = DateTime.UtcNow.ToString("dd.MM.yyyy");
+                    string currentDate = DateTime.UtcNow.ToString("dd.MM.yyyy");
                     await Client.UpdateStatusAsync(new DiscordActivity($"Date: {currentDate}",
                         ActivityType.Watching));
                     break;
                 case 2:
-                    var currentDateTime = DateTime.UtcNow.ToString("HH:mm");
+                    string currentDateTime = DateTime.UtcNow.ToString("HH:mm");
                     await Client.UpdateStatusAsync(new DiscordActivity($"Time: {currentDateTime} UTC",
                         ActivityType.Watching));
                     break;
                 case 3:
-                    var uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime();
-                    var uptimeString = $"{uptime.Hours}h {uptime.Minutes}m {uptime.Seconds}s";
+                    TimeSpan uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime();
+                    string uptimeString = $"{uptime.Hours}h {uptime.Minutes}m {uptime.Seconds}s";
                     await Client.UpdateStatusAsync(
                         new DiscordActivity($"Uptime: {uptimeString}", ActivityType.Watching));
                     break;
                 case 4:
-                    var memberCount = Client.Guilds.Sum(g => g.Value.MemberCount);
+                    int memberCount = Client.Guilds.Sum(g => g.Value.MemberCount);
                     await Client.UpdateStatusAsync(new DiscordActivity(
                         $"Available to '{memberCount}' Users", ActivityType.Watching));
                     break;
                 case 5:
-                    var developerExcuse = await HelperService.GetRandomDeveloperExcuseAsync();
+                    string developerExcuse = await HelperService.GetRandomDeveloperExcuseAsync();
                     await Client.UpdateStatusAsync(new DiscordActivity(
                         $"Excuse: {(developerExcuse.Length > 110 ? developerExcuse[..110] : developerExcuse)}",
                         ActivityType.ListeningTo));
@@ -182,9 +203,10 @@ public class Program
     ///     on later
     /// </summary>
     /// <returns></returns>
-    private static ServiceProvider ConfigureServices()
+    private static ServiceProvider ConfigureServices(IConfiguration configuration)
     {
         return new ServiceCollection()
+            .AddSingleton(configuration)
             .AddSingleton<IWatch2GetherService, Watch2GetherService>()
             .AddSingleton<IOpenWeatherMapService, OpenWeatherMapService>()
             .AddSingleton<IOpenAiService, OpenAiService>()

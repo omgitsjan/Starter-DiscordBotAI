@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using DiscordBot.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
@@ -12,23 +13,25 @@ public class OpenAiService : IOpenAiService
     /// <summary>
     ///     Url to the ChatGPT Api
     /// </summary>
-    private const string ChatGptApiUrl = "https://api.openai.com/v1/chat/completions";
+    private string? _chatGptApiUrl;
 
     /// <summary>
     ///     Url to the Dall-E Api
     /// </summary>
-    private const string DalleApiUrl = "https://api.openai.com/v1/images/generations";
-
-    private readonly IRestClient _httpClient;
+    private string? _dalleApiUrl;
 
     /// <summary>
-    ///     Api Key to access OpenAi Apis like ChatGPT - (REPLACE THIS WITH YOUR API KEY)
+    ///     Api Key to access OpenAi Apis like ChatGPT
     /// </summary>
-    public string OpenAiApiKey = "";
+    private string? _openAiApiKey;
 
-    public OpenAiService(IRestClient httpClient)
+    private readonly IRestClient _httpClient;
+    private readonly IConfiguration _configuration;
+
+    public OpenAiService(IRestClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
+        _configuration = configuration;
     }
 
     /// <summary>
@@ -37,18 +40,30 @@ public class OpenAiService : IOpenAiService
     /// </summary>
     /// <param name="message"></param>
     /// <returns>Boolean indicating whether the request was successful, also the message itself</returns>
-    public async Task<Tuple<bool, string>> ChatGpt(string message)
+    public async Task<Tuple<bool, string>> ChatGptAsync(string message)
     {
         // Holds the response from the API.
         string responseText;
 
         // Use to indicate if the operation was successful or not
-        var success = false;
+        bool success = false;
 
-        if (string.IsNullOrEmpty(OpenAiApiKey))
+        // Retrieve the url and the apikey from the configuration
+        _openAiApiKey = _configuration["OpenAi:ApiKey"] ?? string.Empty;
+        _chatGptApiUrl = _configuration["OpenAi:ChatGPTApiUrl"] ?? string.Empty;
+
+        if (string.IsNullOrEmpty(_openAiApiKey) || string.IsNullOrEmpty(_chatGptApiUrl))
+        {
+            const string errorMessage =
+                "No OpenWeatherMap Api Key/Url was provided, please contact the Developer to add a valid Api Key/Url!";
+            Program.Log($"{nameof(ChatGptAsync)}: " + errorMessage, LogLevel.Error);
+            return new Tuple<bool, string>(success, errorMessage);
+        }
+
+        if (string.IsNullOrEmpty(_openAiApiKey))
         {
             responseText = "No OpenAI Api Key was provided, please contact the Developer to add a valid Api Key!";
-            Program.Log($"{nameof(ChatGpt)}: " + responseText, LogLevel.Error);
+            Program.Log($"{nameof(ChatGptAsync)}: " + responseText, LogLevel.Error);
             return new Tuple<bool, string>(success, responseText.TrimStart('\n'));
         }
 
@@ -57,9 +72,9 @@ public class OpenAiService : IOpenAiService
 
         // Set the request headers
         request.AddHeader("Content-Type", "application/json");
-        request.AddHeader("Authorization", $"Bearer {OpenAiApiKey}");
+        request.AddHeader("Authorization", $"Bearer {_openAiApiKey}");
 
-        request.Resource = ChatGptApiUrl;
+        request.Resource = _chatGptApiUrl;
 
         // Create the request data
         var data = new
@@ -89,7 +104,7 @@ public class OpenAiService : IOpenAiService
             if (string.IsNullOrEmpty(responseText))
             {
                 responseText = "Could not deserialize response from ChatGPT API!";
-                Program.Log($"{nameof(ChatGpt)}: " + responseText, LogLevel.Error);
+                Program.Log($"{nameof(ChatGptAsync)}: " + responseText, LogLevel.Error);
                 return new Tuple<bool, string>(success, responseText.TrimStart('\n'));
             }
 
@@ -98,8 +113,8 @@ public class OpenAiService : IOpenAiService
         else
         {
             // Get the ErrorMessage from the API
-            responseText = response.ErrorMessage ?? "Unknown error occurred";
-            Program.Log($"{nameof(ChatGpt)}: " + responseText, LogLevel.Error);
+            responseText = response.ErrorMessage ?? $"Unknown error occurred (StatusCode: {response.StatusCode})";
+            Program.Log($"{nameof(ChatGptAsync)}: " + responseText, LogLevel.Error);
         }
 
         return new Tuple<bool, string>(success, responseText.TrimStart('\n'));
@@ -111,18 +126,30 @@ public class OpenAiService : IOpenAiService
     /// </summary>
     /// <param name="message"></param>
     /// <returns>Boolean indicating whether the request was successful, also the message itself</returns>
-    public async Task<Tuple<bool, string>> DallE(string message)
+    public async Task<Tuple<bool, string>> DallEAsync(string message)
     {
         // Holds the response from the API.
         string responseText;
 
         // Use to indicate if the operation was successful or not
-        var success = false;
+        bool success = false;
 
-        if (string.IsNullOrEmpty(OpenAiApiKey))
+        // Retrieve the url and the apikey from the configuration
+        _openAiApiKey = _configuration["OpenAi:ApiKey"] ?? string.Empty;
+        _dalleApiUrl = _configuration["OpenAi:DallEApiUrl"] ?? string.Empty;
+
+        if (string.IsNullOrEmpty(_openAiApiKey) || string.IsNullOrEmpty(_dalleApiUrl))
+        {
+            const string errorMessage =
+                "No OpenWeatherMap Api Key/Url was provided, please contact the Developer to add a valid Api Key/Url!";
+            Program.Log($"{nameof(DallEAsync)}: " + errorMessage, LogLevel.Error);
+            return new Tuple<bool, string>(success, errorMessage);
+        }
+
+        if (string.IsNullOrEmpty(_openAiApiKey))
         {
             responseText = "No OpenAI Api Key was provided, please contact the Developer to add a valid Api Key!";
-            Program.Log($"{nameof(DallE)}: " + responseText, LogLevel.Error);
+            Program.Log($"{nameof(DallEAsync)}: " + responseText, LogLevel.Error);
             return new Tuple<bool, string>(success, responseText.TrimStart('\n'));
         }
 
@@ -131,9 +158,9 @@ public class OpenAiService : IOpenAiService
 
         // Set the request headers
         request.AddHeader("Content-Type", "application/json");
-        request.AddHeader("Authorization", $"Bearer {OpenAiApiKey}");
+        request.AddHeader("Authorization", $"Bearer {_openAiApiKey}");
 
-        request.Resource = DalleApiUrl;
+        request.Resource = _dalleApiUrl;
 
         // Create the request data
         var data = new
@@ -163,7 +190,7 @@ public class OpenAiService : IOpenAiService
             if (string.IsNullOrEmpty(imageUrlString))
             {
                 responseText = "Could not deserialize response from Dall-E API!";
-                Program.Log($"{nameof(DallE)}: " + responseText, LogLevel.Error);
+                Program.Log($"{nameof(DallEAsync)}: " + responseText, LogLevel.Error);
                 return new Tuple<bool, string>(success, responseText);
             }
 
@@ -171,7 +198,7 @@ public class OpenAiService : IOpenAiService
 
             // Log the successful API response
             Program.Log(
-                $"{nameof(DallE)}: Received a successful response from the Dall-E API. Generated image URL: {imageUrl}");
+                $"{nameof(DallEAsync)}: Received a successful response from the Dall-E API. Generated image URL: {imageUrl}");
             success = true;
         }
         else
@@ -181,7 +208,7 @@ public class OpenAiService : IOpenAiService
 
             // Log the failed API response
             Program.Log(
-                $"{nameof(DallE)}: Received a failed response from the Dall-E API. Error message: {responseText}",
+                $"{nameof(DallEAsync)}: Received a failed response from the Dall-E API. Error message: {responseText}",
                 LogLevel.Error);
         }
 

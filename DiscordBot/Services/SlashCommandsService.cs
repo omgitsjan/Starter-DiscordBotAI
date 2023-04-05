@@ -72,7 +72,7 @@ public class SlashCommandsService : ISlashCommandsService
             new DiscordInteractionResponseBuilder().WithContent("Sending Request to ChatGPT API..."));
 
         // Execute and waiting for the response from our Method
-        var (success, message) = await _openAiService.ChatGpt(text);
+        (bool success, string message) = await _openAiService.ChatGptAsync(text);
 
         // Creating embed Message via DiscordEmbedBuilder
         var embedMessage = new DiscordEmbedBuilder
@@ -118,7 +118,7 @@ public class SlashCommandsService : ISlashCommandsService
             new DiscordInteractionResponseBuilder().WithContent("Sending Request to DALL-E API..."));
 
         // Execute the DALL-E API request and wait for a response
-        var (sucess, message) = await _openAiService.DallE(text);
+        (bool sucess, string message) = await _openAiService.DallEAsync(text);
 
         // Extract the image URL from the response message using a regular expression
         var url = Regex.Match(message, @"http(s)?://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?").ToString();

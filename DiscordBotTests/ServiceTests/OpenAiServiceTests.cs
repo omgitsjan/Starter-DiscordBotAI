@@ -40,7 +40,7 @@ public class OpenAiServiceTests
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await service.ChatGpt(message);
+        var result = await service.ChatGptAsync(message);
 
         // Assert
         Assert.IsTrue(result.Item1);
@@ -68,7 +68,7 @@ public class OpenAiServiceTests
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await service.ChatGpt(message);
+        var result = await service.ChatGptAsync(message);
 
         // Assert
         Assert.IsFalse(result.Item1);
@@ -96,7 +96,7 @@ public class OpenAiServiceTests
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await service.ChatGpt(message);
+        var result = await service.ChatGptAsync(message);
 
         // Assert
         Assert.IsFalse(result.Item1);
@@ -124,7 +124,7 @@ public class OpenAiServiceTests
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await service.ChatGpt(message);
+        var result = await service.ChatGptAsync(message);
 
         // Assert
         Assert.IsFalse(result.Item1);
@@ -152,7 +152,7 @@ public class OpenAiServiceTests
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await service.DallE(message);
+        var result = await service.DallEAsync(message);
 
         // Assert
         Assert.IsFalse(result.Item1);
@@ -180,7 +180,7 @@ public class OpenAiServiceTests
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await service.DallE(message);
+        var result = await service.DallEAsync(message);
 
         // Assert
         Assert.IsFalse(result.Item1);
@@ -210,7 +210,7 @@ public class OpenAiServiceTests
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await service.DallE(message);
+        var result = await service.DallEAsync(message);
 
         // Assert
         Assert.IsTrue(result.Item1);
@@ -234,7 +234,7 @@ public class OpenAiServiceTests
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _openAiService.DallE(message);
+        var result = await _openAiService.DallEAsync(message);
 
         // Assert
         Assert.IsFalse(result.Item1);
