@@ -1,4 +1,6 @@
 ﻿using DiscordBot.Interfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
 namespace DiscordBot.Services;
@@ -8,13 +10,15 @@ public class CryptoService : ICryptoService
     /// <summary>
     ///     Url to the Bitcoin Price Api
     /// </summary>
-    private const string BitcoinPriceApiUrl = "https://api.bybit.com/v2/public/tickers?symbol=BTCUSD";
+    private string? _byBitApiUrlBtc;
 
-    private readonly IHelperService _helperService;
+    private readonly IHttpService _httpService;
+    private readonly IConfiguration _configuration;
 
-    public CryptoService(IHelperService helperService)
+    public CryptoService(IHttpService httpService, IConfiguration configuration)
     {
-        _helperService = helperService;
+        _httpService = httpService;
+        _configuration = configuration;
     }
 
     /// <summary>
@@ -23,7 +27,17 @@ public class CryptoService : ICryptoService
     /// <returns>The current price from bitcoin as BTCUSD string</returns>
     public async Task<string> GetCurrentBitcoinPriceAsync()
     {
-        var response = await _helperService.GetResponseFromURL(BitcoinPriceApiUrl);
+        _byBitApiUrlBtc = _configuration["ByBit:ApiUrlBtc"] ?? string.Empty;
+
+        if (string.IsNullOrEmpty(_byBitApiUrlBtc))
+        {
+            const string errorMessage =
+                "No ByBit Api Url was provided, please contact the Developer to add a valid Api Url!";
+            Program.Log($"{nameof(GetCurrentBitcoinPriceAsync)}: " + errorMessage, LogLevel.Error);
+            return errorMessage;
+        }
+
+        var response = await _httpService.GetResponseFromURL(_byBitApiUrlBtc);
 
         if (!response.IsSuccessStatusCode)
         {

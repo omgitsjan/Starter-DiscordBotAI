@@ -209,6 +209,7 @@ public class Program
     {
         return new ServiceCollection()
             .AddSingleton(configuration)
+            .AddSingleton<IHttpService, HttpService>()
             .AddSingleton<IWatch2GetherService, Watch2GetherService>()
             .AddSingleton<IOpenWeatherMapService, OpenWeatherMapService>()
             .AddSingleton<IOpenAiService, OpenAiService>()
