@@ -23,9 +23,9 @@ dotnet build`
 
 Next, you need to specify the environment variables for the Discord bot token and ChatGPT API key when starting the bot. For example:
 
-Dont forget to change the static variables in Program.cs and OpenAiServiceService.cs and Watch2GetherService.cs.
+Dont forget to change the variables in appsettings.json.
 
-Replace `DiscordToken`, `ChatGptApiKey`, `W2GApiKey` and `OpenWeatherMapApiKey` with your actual Discord bot token, ChatGPT API key and Watch2Gether API key, respectively.
+Replace `DiscordToken`, `ChatGptApiKey`, `W2GApiKey` and `OpenWeatherMapApiKey` with your actual tokens and API keys, respectively.
 
 ## Usage
 
