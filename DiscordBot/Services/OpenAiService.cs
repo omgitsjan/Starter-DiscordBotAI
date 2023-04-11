@@ -18,18 +18,17 @@ public class OpenAiService : IOpenAiService
     /// </summary>
     private string? _dalleApiUrl;
 
-
     /// <summary>
     ///     Api Key to access OpenAi Apis like ChatGPT
     /// </summary>
     private string? _openAiApiKey;
 
-    private readonly IHelperService _helperService;
+    private readonly IHttpService _httpService;
     private readonly IConfiguration _configuration;
 
-    public OpenAiService(IHelperService helperService, IConfiguration configuration)
+    public OpenAiService(IHttpService httpService, IConfiguration configuration)
     {
-        _helperService = helperService;
+        _httpService = httpService;
         _configuration = configuration;
     }
 
@@ -80,7 +79,7 @@ public class OpenAiService : IOpenAiService
             messages = new[] { new { role = "user", content = message } }
         };
 
-        var response = await _helperService.GetResponseFromURL(_chatGptApiUrl, Method.Post, $"{nameof(ChatGptAsync)}: Unknown error occurred", headers, JsonConvert.SerializeObject(data));
+        var response = await _httpService.GetResponseFromURL(_chatGptApiUrl, Method.Post, $"{nameof(ChatGptAsync)}: Unknown error occurred", headers, JsonConvert.SerializeObject(data));
 
         if (response.IsSuccessStatusCode)
         {
@@ -153,7 +152,7 @@ public class OpenAiService : IOpenAiService
             size = "1024x1024"
         };
 
-        var response = await _helperService.GetResponseFromURL(_dalleApiUrl, Method.Post, $"{nameof(DallEAsync)}: Received a failed response from the Dall-E API.", headers, JsonConvert.SerializeObject(data));
+        var response = await _httpService.GetResponseFromURL(_dalleApiUrl, Method.Post, $"{nameof(DallEAsync)}: Received a failed response from the Dall-E API.", headers, JsonConvert.SerializeObject(data));
 
         // Check the status code of the response
         if (response.IsSuccessStatusCode)

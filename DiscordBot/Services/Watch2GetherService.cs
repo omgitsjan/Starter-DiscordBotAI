@@ -23,13 +23,12 @@ public class Watch2GetherService : IWatch2GetherService
     /// </summary>
     private string? _w2GShowRoomUrl;
 
-    private readonly IHelperService _helperService;
-
+    private readonly IHttpService _httpService;
     private readonly IConfiguration _configuration;
 
-    public Watch2GetherService(IHelperService helperService, IConfiguration configuration)
+    public Watch2GetherService(IHttpService httpService, IConfiguration configuration)
     {
-        _helperService = helperService;
+        _httpService = httpService;
         _configuration = configuration;
     }
 
@@ -69,7 +68,7 @@ public class Watch2GetherService : IWatch2GetherService
             share = videoUrl
         };
 
-        var response = await _helperService.GetResponseFromURL(_w2GCreateRoomUrl, Method.Post, $"{nameof(CreateRoom)}: No response from Watch2Gether", headers, JsonConvert.SerializeObject(data));
+        var response = await _httpService.GetResponseFromURL(_w2GCreateRoomUrl, Method.Post, $"{nameof(CreateRoom)}: No response from Watch2Gether", headers, JsonConvert.SerializeObject(data));
 
         message = response.Content;
 

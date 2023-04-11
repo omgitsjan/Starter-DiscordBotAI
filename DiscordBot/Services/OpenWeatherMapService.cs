@@ -19,13 +19,12 @@ public class OpenWeatherMapService : IOpenWeatherMapService
     /// </summary>
     private string? _openWeatherMapApiKey;
 
-    private readonly IHelperService _helperService;
+    private readonly IHttpService _httpService;
     private readonly IConfiguration _configuration;
 
-
-    public OpenWeatherMapService(IHelperService helperService, IConfiguration configuration)
+    public OpenWeatherMapService(IHttpService httpService, IConfiguration configuration)
     {
-        _helperService = helperService;
+        _httpService = httpService;
         _configuration = configuration;
     }
 
@@ -44,8 +43,7 @@ public class OpenWeatherMapService : IOpenWeatherMapService
                 null);
         }
 
-
-        var response = await _helperService.GetResponseFromURL($"{_openWeatherMapApiKey}{Uri.EscapeDataString(city)}&units=metric&appid={_openWeatherMapApiKey}", Method.Post, $"{nameof(GetWeatherAsync)}: Failed to fetch weather data for city '{city}'.");
+        var response = await _httpService.GetResponseFromURL($"{_openWeatherMapUrl}{Uri.EscapeDataString(city)}&units=metric&appid={_openWeatherMapApiKey}", Method.Post, $"{nameof(GetWeatherAsync)}: Failed to fetch weather data for city '{city}'.");
 
         if (!response.IsSuccessStatusCode)
         {
