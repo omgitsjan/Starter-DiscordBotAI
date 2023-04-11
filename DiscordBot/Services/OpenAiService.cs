@@ -1,10 +1,8 @@
-﻿using System.Net;
 using DiscordBot.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace DiscordBot.Services;
 
@@ -20,17 +18,18 @@ public class OpenAiService : IOpenAiService
     /// </summary>
     private string? _dalleApiUrl;
 
+
     /// <summary>
     ///     Api Key to access OpenAi Apis like ChatGPT
     /// </summary>
     private string? _openAiApiKey;
 
-    private readonly IRestClient _httpClient;
+    private readonly IHelperService _helperService;
     private readonly IConfiguration _configuration;
 
-    public OpenAiService(IRestClient httpClient, IConfiguration configuration)
+    public OpenAiService(IHelperService helperService, IConfiguration configuration)
     {
-        _httpClient = httpClient;
+        _helperService = helperService;
         _configuration = configuration;
     }
 
@@ -67,14 +66,10 @@ public class OpenAiService : IOpenAiService
             return new Tuple<bool, string>(success, responseText.TrimStart('\n'));
         }
 
-        // Create a new RestRequest instance
-        var request = new RestRequest("", Method.Post);
-
-        // Set the request headers
-        request.AddHeader("Content-Type", "application/json");
-        request.AddHeader("Authorization", $"Bearer {_openAiApiKey}");
-
-        request.Resource = _chatGptApiUrl;
+        var headers = new List<KeyValuePair<string, string>> {
+            new KeyValuePair<string, string>("Content-Type", "application/json"),
+            new KeyValuePair<string, string>("Authorization", $"Bearer {_openAiApiKey}")
+        };
 
         // Create the request data
         var data = new
@@ -85,17 +80,9 @@ public class OpenAiService : IOpenAiService
             messages = new[] { new { role = "user", content = message } }
         };
 
-        // Serialzie it via JsonSerializer
-        var jsonDataString = JsonConvert.SerializeObject(data);
+        var response = await _helperService.GetResponseFromURL(_chatGptApiUrl, Method.Post, $"{nameof(ChatGptAsync)}: Unknown error occurred", headers, JsonConvert.SerializeObject(data));
 
-        // Add the request data to the request body
-        request.AddJsonBody(jsonDataString);
-
-        // Send the request and get the response
-        var response = await _httpClient.ExecuteAsync(request);
-
-        // Check the status code of the response
-        if (response.Content != null && response.StatusCode == HttpStatusCode.OK)
+        if (response.IsSuccessStatusCode)
         {
             // Get the response text from the API
             responseText =
@@ -112,9 +99,7 @@ public class OpenAiService : IOpenAiService
         }
         else
         {
-            // Get the ErrorMessage from the API
-            responseText = response.ErrorMessage ?? $"Unknown error occurred (StatusCode: {response.StatusCode})";
-            Program.Log($"{nameof(ChatGptAsync)}: " + responseText, LogLevel.Error);
+            responseText = response.Content;
         }
 
         return new Tuple<bool, string>(success, responseText.TrimStart('\n'));
@@ -153,14 +138,10 @@ public class OpenAiService : IOpenAiService
             return new Tuple<bool, string>(success, responseText.TrimStart('\n'));
         }
 
-        // Create a new RestRequest instance
-        var request = new RestRequest("", Method.Post);
-
-        // Set the request headers
-        request.AddHeader("Content-Type", "application/json");
-        request.AddHeader("Authorization", $"Bearer {_openAiApiKey}");
-
-        request.Resource = _dalleApiUrl;
+        var headers = new List<KeyValuePair<string, string>> {
+            new KeyValuePair<string, string>("Content-Type", "application/json"),
+            new KeyValuePair<string, string>("Authorization", $"Bearer {_openAiApiKey}")
+        };
 
         // Create the request data
         var data = new
@@ -172,17 +153,10 @@ public class OpenAiService : IOpenAiService
             size = "1024x1024"
         };
 
-        // Serialzie it via JsonSerializer
-        var jsonData = JsonSerializer.Serialize(data);
-
-        // Add the request data to the request body
-        request.AddJsonBody(jsonData);
-
-        // Send the request and get the response
-        var response = await _httpClient.ExecuteAsync(request);
+        var response = await _helperService.GetResponseFromURL(_dalleApiUrl, Method.Post, $"{nameof(DallEAsync)}: Received a failed response from the Dall-E API.", headers, JsonConvert.SerializeObject(data));
 
         // Check the status code of the response
-        if (response.Content != null && response.StatusCode == HttpStatusCode.OK)
+        if (response.IsSuccessStatusCode)
         {
             // Get the image URL from the API response
             var imageUrl = JsonConvert.DeserializeObject<dynamic>(response.Content)?["data"][0]["url"];
@@ -203,13 +177,7 @@ public class OpenAiService : IOpenAiService
         }
         else
         {
-            // Get the ErrorMessage from the API
-            responseText = response.ErrorMessage ?? "Unknown error occurred";
-
-            // Log the failed API response
-            Program.Log(
-                $"{nameof(DallEAsync)}: Received a failed response from the Dall-E API. Error message: {responseText}",
-                LogLevel.Error);
+            responseText = response.Content;
         }
 
         return new Tuple<bool, string>(success, responseText);

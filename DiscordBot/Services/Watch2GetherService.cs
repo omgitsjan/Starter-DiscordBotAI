@@ -23,12 +23,13 @@ public class Watch2GetherService : IWatch2GetherService
     /// </summary>
     private string? _w2GShowRoomUrl;
 
-    private readonly IRestClient _httpClient;
+    private readonly IHelperService _helperService;
+
     private readonly IConfiguration _configuration;
 
-    public Watch2GetherService(IRestClient httpClient, IConfiguration configuration)
+    public Watch2GetherService(IHelperService helperService, IConfiguration configuration)
     {
-        _httpClient = httpClient;
+        _helperService = helperService;
         _configuration = configuration;
     }
 
@@ -42,69 +43,60 @@ public class Watch2GetherService : IWatch2GetherService
     /// </returns>
     public async Task<Tuple<bool, string>> CreateRoom(string videoUrl)
     {
-        // Initialize a new instance of RestClient and empty message and success variables.
-        string message;
-        var success = false;
-
         // Retrieve the urls and the apikey from the configuration
         _w2GApiKey = _configuration["Watch2Gether:ApiKey"] ?? string.Empty;
         _w2GCreateRoomUrl = _configuration["Watch2Gether:CreateRoomUrl"] ?? string.Empty;
         _w2GShowRoomUrl = _configuration["Watch2Gether:ShowRoomUrl"] ?? string.Empty;
+
+        string message = "";
 
         if (string.IsNullOrEmpty(_w2GApiKey) || string.IsNullOrEmpty(_w2GCreateRoomUrl) ||
             string.IsNullOrEmpty(_w2GShowRoomUrl))
         {
             message = "Could not load necessary configuration, please provide a valid configuration";
             Program.Log($"{nameof(CreateRoom)}: " + message, LogLevel.Error);
-            return new Tuple<bool, string>(success, message);
+            return new Tuple<bool, string>(false, message);
         }
 
-        // Initialize a new instance of RestRequest with the Watch2Gether room creation URL and HTTP method.
-        var request = new RestRequest("", Method.Post);
+        var headers = new List<KeyValuePair<string, string>> {
+            new KeyValuePair<string, string>("Content-Type", "application/json"),
+            new KeyValuePair<string, string>("Accept", "application/json")
+        };
 
-        // Add required headers and JSON payload to the request.
-        request.AddHeader("Content-Type", "application/json");
-        request.AddHeader("Accept", "application/json");
-        request.AddJsonBody(new
+        var data = new
         {
             w2g_api_key = _w2GApiKey,
             share = videoUrl
-        });
+        };
 
-        request.Resource = _w2GCreateRoomUrl;
+        var response = await _helperService.GetResponseFromURL(_w2GCreateRoomUrl, Method.Post, $"{nameof(CreateRoom)}: No response from Watch2Gether", headers, JsonConvert.SerializeObject(data));
 
-        // Send the HTTP request asynchronously and await the response.
-        var response = await _httpClient.ExecuteAsync(request);
+        message = response.Content;
 
         // If the response content is null, set the error message and return the result Tuple.
-        if (string.IsNullOrEmpty(response.Content))
+        if (response.IsSuccessStatusCode)
         {
-            message = "No response from Watch2Gether";
-            Program.Log($"{nameof(CreateRoom)}: " + message, LogLevel.Error);
-            return new Tuple<bool, string>(success, message);
+            try
+            {
+                // Deserialize the response content into a dynamic object and extract the streamkey property.
+                var responseObj = JsonConvert.DeserializeObject<dynamic>(response.Content);
+                message = _w2GCreateRoomUrl + responseObj?.streamkey;
+            }
+            catch (Exception e)
+            {
+                // Log any deserialization exceptions to the console.
+                message = "Failed to deserialize response from Watch2Gether";
+                Program.Log($"{nameof(CreateRoom)}: " + message + $" Error: {e.Message}",
+                    LogLevel.Error);
+            }
         }
 
-        try
-        {
-            // Deserialize the response content into a dynamic object and extract the streamkey property.
-            var responseObj = JsonConvert.DeserializeObject<dynamic>(response.Content);
-            message = _w2GShowRoomUrl + responseObj?.streamkey;
-            success = true;
-        }
-        catch (Exception e)
-        {
-            // Log any deserialization exceptions to the console.
-            message = "Failed to deserialize response from Watch2Gether";
-            Program.Log($"{nameof(CreateRoom)}: " + message + $" Error: {e.Message}",
-                LogLevel.Error);
-        }
-
-        if (success)
+        if (response.IsSuccessStatusCode)
             Program.Log($"{nameof(CreateRoom)}: Successfully created Watch2Gether room: {message}");
         else
             Program.Log($"{nameof(CreateRoom)}: Failed to create Watch2Gether room. Error: {message}", LogLevel.Error);
 
         // Return the result Tuple with success status and message.
-        return new Tuple<bool, string>(success, message);
+        return new Tuple<bool, string>(response.IsSuccessStatusCode, message);
     }
 }
