@@ -40,6 +40,7 @@ public class Program
     ///     The IHelperService instance used for various helper functions
     /// </summary>
     public static IHelperService? HelperService { get; private set; }
+    public static ICryptoService? CryptoService { get; private set; }
 
     /// <summary>
     ///     Init Program
@@ -69,8 +70,9 @@ public class Program
 
         Logger = services.GetService<ILogger<Program>>();
         HelperService = services.GetService<IHelperService>();
+        CryptoService = services.GetService<ICryptoService>();
 
-        if (HelperService == null || Logger == null)
+        if (HelperService == null || Logger == null || CryptoService == null)
         {
             Log(
                 "Not all Services could be loaded. Please check the code or open a Issue on Github via omgitsjan/DiscordBotAI!",
@@ -132,9 +134,9 @@ public class Program
             switch (statusIndex)
             {
                 case 0:
-                    string currentBitcoinPrice = await HelperService.GetCurrentBitcoinPriceAsync();
-                    DiscordActivity activity1 =
-                        new(
+                    var currentBitcoinPrice = await CryptoService.GetCurrentBitcoinPriceAsync();
+                    var activity1 =
+                        new DiscordActivity(
                             $"BTC: ${(currentBitcoinPrice.Length > 110 ? currentBitcoinPrice[..110] : currentBitcoinPrice)}",
                             ActivityType.Watching);
                     await Client.UpdateStatusAsync(activity1);
@@ -210,6 +212,7 @@ public class Program
             .AddSingleton<IWatch2GetherService, Watch2GetherService>()
             .AddSingleton<IOpenWeatherMapService, OpenWeatherMapService>()
             .AddSingleton<IOpenAiService, OpenAiService>()
+            .AddSingleton<ICryptoService, CryptoService>()
             .AddSingleton<IHelperService, HelperService>()
             .AddSingleton<IInteractionContextWrapper, InteractionContextWrapper>()
             .AddSingleton<ISlashCommandsService, SlashCommandsService>()

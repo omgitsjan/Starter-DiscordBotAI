@@ -30,23 +30,23 @@ public class HelperServiceTests
 
     // ...
 
-    [Test]
-    public async Task GetCurrentBitcoinPriceAsync_ReturnsCurrentBitcoinPrice()
-    {
-        // Arrange
-        const string jsonResponse = "{\"result\": [{\"last_price\": \"50000\"}]}";
-        const string expectedPrice = "50000";
+    //[Test]
+    //public async Task GetCurrentBitcoinPriceAsync_ReturnsCurrentBitcoinPrice()
+    //{
+    //    // Arrange
+    //    const string jsonResponse = "{\"result\": [{\"last_price\": \"50000\"}]}";
+    //    const string expectedPrice = "50000";
 
-        _mockRestClient
-            .Setup(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default))
-            .ReturnsAsync(new RestResponse { Content = jsonResponse });
+    //    _mockRestClient
+    //        .Setup(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default))
+    //        .ReturnsAsync(new RestResponse { Content = jsonResponse });
 
-        // Act
-        var result = await _helperService.GetCurrentBitcoinPriceAsync();
+    //    // Act
+    //    var result = await _helperService.GetCurrentBitcoinPriceAsync();
 
         // Assert
-        Assert.That(result, Is.EqualTo(expectedPrice));
-    }
+    //    Assert.That(result, Is.EqualTo(expectedPrice));
+    //}
 
     [Test]
     public async Task GetRandomDeveloperExcuseAsync_ReturnsRandomDeveloperExcuse()

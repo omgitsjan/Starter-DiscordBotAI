@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using RestSharp;
+using Newtonsoft.Json;
 
 namespace DiscordBot.Services;
 
@@ -21,29 +22,6 @@ public class HelperService : IHelperService
     }
 
     /// <summary>
-    ///     Gets the current Bitcion price from bybit public api
-    /// </summary>
-    /// <returns>The current price from bitcoin as BTCUSD string</returns>
-    public async Task<string> GetCurrentBitcoinPriceAsync()
-    {
-        _byBitApiUrlBtc = _configuration["ByBit:ApiUrlBtc"] ?? string.Empty;
-
-        if (string.IsNullOrEmpty(_byBitApiUrlBtc))
-        {
-            const string errorMessage =
-                "No ByBit Api Url was provided, please contact the Developer to add a valid Api Url!";
-            Program.Log($"{nameof(GetCurrentBitcoinPriceAsync)}: " + errorMessage, LogLevel.Error);
-            return errorMessage;
-        }
-
-        RestRequest request = new(_byBitApiUrlBtc);
-        var response = await _httpClient.ExecuteAsync(request);
-        var jsonString = response.Content;
-        var json = JObject.Parse(jsonString ?? "{}");
-        return json["result"]?[0]?["last_price"]?.Value<string>() ?? "Could not fetch current Bitcoin price...";
-    }
-
-    /// <summary>
     ///     Gets a random dev excuse from the open dev-excuses-api (herokuapp.com)
     /// </summary>
     /// <returns></returns>
@@ -59,10 +37,58 @@ public class HelperService : IHelperService
             return errorMessage;
         }
 
-        RestRequest request = new(_developerExcuseApiUrl);
-        var response = await _httpClient.ExecuteAsync(request);
-        var jsonString = response.Content;
-        var json = JObject.Parse(jsonString ?? "{}");
+        var response = await GetResponseFromURL(_developerExcuseApiUrl);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return response.Content;
+        }
+
+        var json = JObject.Parse(response.Content ?? "{}");
+
         return json["text"]?.Value<string>() ?? "Could not fetch current Developer excuse...";
+    }
+
+    /// <summary>
+    ///     Gets the response from an URL and handles errors
+    /// </summary>
+    /// <returns>The current price from bitcoin as BTCUSD string</returns>
+    public async Task<HttpResponse> GetResponseFromURL(string resource, Method method = Method.Get, string? errorMessage = null, List<KeyValuePair<string, string>> headers = null, string jsonBodyString = null)
+    {
+        var request = new RestRequest(resource, method);
+
+        if (headers != null && headers.Any())
+        {
+            headers.ForEach(header => request.AddHeader(header.Key, header.Value));
+        }
+
+        if (!String.IsNullOrEmpty(jsonBodyString))
+        {
+            request.AddJsonBody(JsonConvert.DeserializeObject<object>(jsonBodyString));
+        }
+
+        // Send the HTTP request asynchronously and await the response.
+        var response = await _httpClient.ExecuteAsync(request);
+        var content = response.Content;
+
+        if (!response.IsSuccessStatusCode)
+        {
+            content = $"StatusCode: {response.StatusCode} | {errorMessage ?? response.ErrorMessage}";
+            Program.Log(content, LogLevel.Error);
+        }
+
+        return new HttpResponse(response.IsSuccessStatusCode, content);
+    }
+}
+
+public class HttpResponse
+{
+    public bool IsSuccessStatusCode { get; set; }
+    public string Content { get; set; }
+
+    public HttpResponse(bool IsSuccessStatusCode, string Content)
+    {
+        this.IsSuccessStatusCode = IsSuccessStatusCode;
+        this.Content = Content;
     }
 }

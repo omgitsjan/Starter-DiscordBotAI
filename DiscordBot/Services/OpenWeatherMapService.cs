@@ -14,19 +14,18 @@ public class OpenWeatherMapService : IOpenWeatherMapService
     /// </summary>
     private string? _openWeatherMapUrl;
 
-
     /// <summary>
     ///     Api Key to access OpenWeatherMap Api
     /// </summary>
     private string? _openWeatherMapApiKey;
 
-    private readonly IRestClient _httpClient;
+    private readonly IHelperService _helperService;
     private readonly IConfiguration _configuration;
 
 
-    public OpenWeatherMapService(IRestClient httpClient, IConfiguration configuration)
+    public OpenWeatherMapService(IHelperService helperService, IConfiguration configuration)
     {
-        _httpClient = httpClient;
+        _helperService = helperService;
         _configuration = configuration;
     }
 
@@ -46,29 +45,14 @@ public class OpenWeatherMapService : IOpenWeatherMapService
         }
 
 
-        var requestUrl =
-            $"{_openWeatherMapUrl}{Uri.EscapeDataString(city)}&units=metric&appid={_openWeatherMapApiKey}";
-
-        // Initialize a new instance of RestRequest with the Watch2Gether room creation URL and HTTP method.
-        var request = new RestRequest("", Method.Post)
-        {
-            Resource = requestUrl
-        };
-
-        // Send the HTTP request asynchronously and await the response.
-        var response = await _httpClient.ExecuteAsync(request);
-
+        var response = await _helperService.GetResponseFromURL($"{_openWeatherMapApiKey}{Uri.EscapeDataString(city)}&units=metric&appid={_openWeatherMapApiKey}", Method.Post, $"{nameof(GetWeatherAsync)}: Failed to fetch weather data for city '{city}'.");
 
         if (!response.IsSuccessStatusCode)
         {
-            var errorMessage = $"Failed to fetch weather data for city '{city}'. StatusCode: {response.StatusCode}";
-            Program.Log($"{nameof(GetWeatherAsync)}: " + errorMessage, LogLevel.Error);
-            return (false, "Failed to fetch weather data. Please check the city name and try again.",
-                null);
+            return (false, response.Content, null);
         }
 
-        var jsonString = response.Content;
-        var json = JObject.Parse(jsonString ?? "");
+        var json = JObject.Parse(response.Content ?? "");
 
         var weather = new WeatherData
         {
