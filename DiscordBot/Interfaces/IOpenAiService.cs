@@ -2,7 +2,7 @@
 
 public interface IOpenAiService
 {
-    public Task<Tuple<bool, string>> ChatGpt(string message);
+    public Task<Tuple<bool, string>> ChatGptAsync(string message);
 
-    public Task<Tuple<bool, string>> DallE(string message);
+    public Task<Tuple<bool, string>> DallEAsync(string message);
 }

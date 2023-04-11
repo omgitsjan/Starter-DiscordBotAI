@@ -1,6 +1,7 @@
 using System.Net;
 using System.Reflection;
 using DiscordBot.Services;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using RestSharp;
 
@@ -13,7 +14,19 @@ public class OpenWeatherMapServiceTests
     public void Setup()
     {
         _mockRestClient = new Mock<IRestClient>();
-        _openWeatherMapService = new OpenWeatherMapService(_mockRestClient.Object);
+
+        // Create an in-memory configuration for testing purposes
+        var configurationBuilder = new ConfigurationBuilder();
+        configurationBuilder.AddInMemoryCollection(new[]
+        {
+            new KeyValuePair<string, string?>("Watch2Gether:ApiKey", "testKey"),
+            new KeyValuePair<string, string?>("Watch2Gether:CreateRoomUrl",
+                "https://api.watch2gether.com/rooms/create"),
+            new KeyValuePair<string, string?>("Watch2Gether:ShowRoomUrl", "https://w2g.tv/rooms/")
+        });
+        var configuration = configurationBuilder.Build();
+
+        _openWeatherMapService = new OpenWeatherMapService(_mockRestClient.Object, configuration);
     }
 
     private Mock<IRestClient> _mockRestClient;
@@ -41,10 +54,17 @@ public class OpenWeatherMapServiceTests
             Content = jsonResponse
         };
 
-        var service = new OpenWeatherMapService(_mockRestClient.Object)
+        // Create an in-memory configuration for testing purposes
+        var configurationBuilder = new ConfigurationBuilder();
+        configurationBuilder.AddInMemoryCollection(new[]
         {
-            OpenWeatherMapApiKey = "testKey"
-        };
+            new KeyValuePair<string, string?>("OpenWeatherMap:ApiKey", "testKey"),
+            new KeyValuePair<string, string?>("OpenWeatherMap:ApiUrl",
+                "https://api.openweathermap.org/data/2.5/weather?q=")
+        });
+        var configuration = configurationBuilder.Build();
+
+        var service = new OpenWeatherMapService(_mockRestClient.Object, configuration);
 
         _mockRestClient.Setup(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default))
             .ReturnsAsync(expectedResponse);
@@ -69,17 +89,24 @@ public class OpenWeatherMapServiceTests
         // Arrange
         const string city = "Berlin";
         const string expectedMessage =
-            "No OpenWeatherMap Api Key was provided, please contact the Developer to add a valid Api Key!";
+            "No OpenWeatherMap Api Key/Url was provided, please contact the Developer to add a valid Api Key/Url!";
 
         var expectedResponse = new RestResponse
         {
             StatusCode = HttpStatusCode.Forbidden,
             Content = ""
         };
-        var service = new OpenWeatherMapService(_mockRestClient.Object)
+
+        var configurationBuilder = new ConfigurationBuilder();
+        configurationBuilder.AddInMemoryCollection(new[]
         {
-            OpenWeatherMapApiKey = ""
-        };
+            new KeyValuePair<string, string?>("OpenWeatherMap:ApiKey", ""),
+            new KeyValuePair<string, string?>("OpenWeatherMap:ApiUrl",
+                "https://api.openweathermap.org/data/2.5/weather?q=")
+        });
+        var configuration = configurationBuilder.Build();
+
+        var service = new OpenWeatherMapService(_mockRestClient.Object, configuration);
 
         // Set the OpenWeatherMapApiKey to an empty string
         typeof(OpenWeatherMapService)
@@ -108,10 +135,16 @@ public class OpenWeatherMapServiceTests
             StatusCode = HttpStatusCode.NotFound
         };
 
-        var service = new OpenWeatherMapService(_mockRestClient.Object)
+        var configurationBuilder = new ConfigurationBuilder();
+        configurationBuilder.AddInMemoryCollection(new[]
         {
-            OpenWeatherMapApiKey = "testKey"
-        };
+            new KeyValuePair<string, string?>("OpenWeatherMap:ApiKey", "testKey"),
+            new KeyValuePair<string, string?>("OpenWeatherMap:ApiUrl",
+                "https://api.openweathermap.org/data/2.5/weather?q=")
+        });
+        var configuration = configurationBuilder.Build();
+
+        var service = new OpenWeatherMapService(_mockRestClient.Object, configuration);
 
         _mockRestClient.Setup(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default))
             .ReturnsAsync(expectedResponse);
@@ -121,7 +154,8 @@ public class OpenWeatherMapServiceTests
 
         // Assert
         Assert.IsFalse(result.Success);
-        Assert.AreEqual("Failed to fetch weather data. Please check the city name and try again.", result.Message);
+        Assert.That(result.Message,
+            Is.EqualTo("Failed to fetch weather data. Please check the city name and try again."));
         Assert.IsNull(result.weatherData);
     }
 }

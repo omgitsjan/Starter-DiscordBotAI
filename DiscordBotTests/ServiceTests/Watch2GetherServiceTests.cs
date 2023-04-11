@@ -1,4 +1,5 @@
 using DiscordBot.Services;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using Newtonsoft.Json;
 using RestSharp;
@@ -12,7 +13,19 @@ public class Watch2GetherServiceTests
     public void Setup()
     {
         _mockRestClient = new Mock<IRestClient>();
-        _watch2GetherService = new Watch2GetherService(_mockRestClient.Object);
+
+        // Create an in-memory configuration for testing purposes
+        var configurationBuilder = new ConfigurationBuilder();
+        configurationBuilder.AddInMemoryCollection(new[]
+        {
+            new KeyValuePair<string, string?>("Watch2Gether:ApiKey", "testKey"),
+            new KeyValuePair<string, string?>("Watch2Gether:CreateRoomUrl",
+                "https://api.watch2gether.com/rooms/create"),
+            new KeyValuePair<string, string?>("Watch2Gether:ShowRoomUrl", "https://w2g.tv/rooms/")
+        });
+        var configuration = configurationBuilder.Build();
+
+        _watch2GetherService = new Watch2GetherService(_mockRestClient.Object, configuration);
     }
 
     private Watch2GetherService _watch2GetherService;
@@ -40,7 +53,7 @@ public class Watch2GetherServiceTests
         // Assert
         _mockRestClient.Verify(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default), Times.Once);
         Assert.IsTrue(success);
-        Assert.AreEqual($"https://w2g.tv/rooms/{streamKey}", result);
+        Assert.That(result, Is.EqualTo($"https://w2g.tv/rooms/{streamKey}"));
     }
 
     [Test]
@@ -58,7 +71,7 @@ public class Watch2GetherServiceTests
         // Assert
         _mockRestClient.Verify(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default), Times.Once);
         Assert.IsFalse(success);
-        Assert.AreEqual("No response from Watch2Gether", result);
+        Assert.That(result, Is.EqualTo("No response from Watch2Gether"));
     }
 
     [Test]
@@ -77,6 +90,6 @@ public class Watch2GetherServiceTests
         // Assert
         _mockRestClient.Verify(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default), Times.Once);
         Assert.IsFalse(success);
-        Assert.AreEqual(errorMessage, result);
+        Assert.That(result, Is.EqualTo(errorMessage));
     }
 }

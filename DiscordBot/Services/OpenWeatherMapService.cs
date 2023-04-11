@@ -1,5 +1,6 @@
 ﻿using DiscordBot.Interfaces;
 using DiscordBot.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using RestSharp;
@@ -11,26 +12,34 @@ public class OpenWeatherMapService : IOpenWeatherMapService
     /// <summary>
     ///     Url to the OpenWeatherMap Api
     /// </summary>
-    private const string OpenWeatherMapUrl = "https://api.openweathermap.org/data/2.5/weather?q=";
+    private string? _openWeatherMapUrl;
 
-    private readonly IRestClient _httpClient;
 
     /// <summary>
-    ///     Api Key to access OpenWeatherMap Api - (REPLACE THIS WITH YOUR API KEY)
+    ///     Api Key to access OpenWeatherMap Api
     /// </summary>
-    public string OpenWeatherMapApiKey = "";
+    private string? _openWeatherMapApiKey;
 
-    public OpenWeatherMapService(IRestClient httpClient)
+    private readonly IRestClient _httpClient;
+    private readonly IConfiguration _configuration;
+
+
+    public OpenWeatherMapService(IRestClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
+        _configuration = configuration;
     }
 
     public async Task<(bool Success, string Message, WeatherData? weatherData)> GetWeatherAsync(string city)
     {
-        if (string.IsNullOrEmpty(OpenWeatherMapApiKey))
+        // Retrieve the url and the apikey from the configuration
+        _openWeatherMapUrl = _configuration["OpenWeatherMap:ApiKey"] ?? string.Empty;
+        _openWeatherMapApiKey = _configuration["OpenWeatherMap:ApiUrl"] ?? string.Empty;
+
+        if (string.IsNullOrEmpty(_openWeatherMapApiKey) || string.IsNullOrEmpty(_openWeatherMapUrl))
         {
             const string errorMessage =
-                "No OpenWeatherMap Api Key was provided, please contact the Developer to add a valid Api Key!";
+                "No OpenWeatherMap Api Key/Url was provided, please contact the Developer to add a valid Api Key/Url!";
             Program.Log($"{nameof(GetWeatherAsync)}: " + errorMessage, LogLevel.Error);
             return (false, errorMessage,
                 null);
@@ -38,7 +47,7 @@ public class OpenWeatherMapService : IOpenWeatherMapService
 
 
         var requestUrl =
-            $"{OpenWeatherMapUrl}{Uri.EscapeDataString(city)}&units=metric&appid={OpenWeatherMapApiKey}";
+            $"{_openWeatherMapUrl}{Uri.EscapeDataString(city)}&units=metric&appid={_openWeatherMapApiKey}";
 
         // Initialize a new instance of RestRequest with the Watch2Gether room creation URL and HTTP method.
         var request = new RestRequest("", Method.Post)

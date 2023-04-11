@@ -1,4 +1,6 @@
 ﻿using DiscordBot.Interfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 
@@ -6,11 +8,16 @@ namespace DiscordBot.Services;
 
 public class HelperService : IHelperService
 {
-    private readonly IRestClient _httpClient;
+    private string? _byBitApiUrlBtc;
+    private string? _developerExcuseApiUrl;
 
-    public HelperService(IRestClient httpClient)
+    private readonly IRestClient _httpClient;
+    private readonly IConfiguration _configuration;
+
+    public HelperService(IRestClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
+        _configuration = configuration;
     }
 
     /// <summary>
@@ -19,7 +26,17 @@ public class HelperService : IHelperService
     /// <returns>The current price from bitcoin as BTCUSD string</returns>
     public async Task<string> GetCurrentBitcoinPriceAsync()
     {
-        var request = new RestRequest("https://api.bybit.com/v2/public/tickers?symbol=BTCUSD");
+        _byBitApiUrlBtc = _configuration["ByBit:ApiUrlBtc"] ?? string.Empty;
+
+        if (string.IsNullOrEmpty(_byBitApiUrlBtc))
+        {
+            const string errorMessage =
+                "No ByBit Api Url was provided, please contact the Developer to add a valid Api Url!";
+            Program.Log($"{nameof(GetCurrentBitcoinPriceAsync)}: " + errorMessage, LogLevel.Error);
+            return errorMessage;
+        }
+
+        RestRequest request = new(_byBitApiUrlBtc);
         var response = await _httpClient.ExecuteAsync(request);
         var jsonString = response.Content;
         var json = JObject.Parse(jsonString ?? "{}");
@@ -32,7 +49,17 @@ public class HelperService : IHelperService
     /// <returns></returns>
     public async Task<string> GetRandomDeveloperExcuseAsync()
     {
-        var request = new RestRequest("https://api.devexcus.es/");
+        _developerExcuseApiUrl = _configuration["DeveloperExcuse:ApiUrl"] ?? string.Empty;
+
+        if (string.IsNullOrEmpty(_developerExcuseApiUrl))
+        {
+            const string errorMessage =
+                "No DeveloperExcuse Api Url was provided, please contact the Developer to add a valid Api Url!";
+            Program.Log($"{nameof(GetRandomDeveloperExcuseAsync)}: " + errorMessage, LogLevel.Error);
+            return errorMessage;
+        }
+
+        RestRequest request = new(_developerExcuseApiUrl);
         var response = await _httpClient.ExecuteAsync(request);
         var jsonString = response.Content;
         var json = JObject.Parse(jsonString ?? "{}");

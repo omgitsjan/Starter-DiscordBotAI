@@ -58,7 +58,7 @@ public class SlashCommandsServiceTests
     public async Task TestChatSlashCommandAsync_Success()
     {
         // Arrange
-        _openAiServiceMock.Setup(service => service.ChatGpt(It.IsAny<string>()))
+        _openAiServiceMock.Setup(service => service.ChatGptAsync(It.IsAny<string>()))
             .ReturnsAsync(Tuple.Create(true, "Sample ChatGPT Response"));
 
         // Act
@@ -70,14 +70,14 @@ public class SlashCommandsServiceTests
                 It.IsAny<DiscordInteractionResponseBuilder>()), Times.Once);
         _ctxMock.Verify(ctx => ctx.DeleteResponseAsync(), Times.Once);
         _ctxMock.Verify(ctx => ctx.Channel.SendMessageAsync(It.IsAny<string>()), Times.Exactly(2));
-        _openAiServiceMock.Verify(service => service.ChatGpt("Sample Text"), Times.Once);
+        _openAiServiceMock.Verify(service => service.ChatGptAsync("Sample Text"), Times.Once);
     }
 
     [Test]
     public async Task TestChatSlashCommandAsync_Failure()
     {
         // Arrange
-        _openAiServiceMock.Setup(service => service.ChatGpt(It.IsAny<string>()))
+        _openAiServiceMock.Setup(service => service.ChatGptAsync(It.IsAny<string>()))
             .ReturnsAsync(Tuple.Create(false, "Error"));
 
         // Act
@@ -89,14 +89,14 @@ public class SlashCommandsServiceTests
                 It.IsAny<DiscordInteractionResponseBuilder>()), Times.Once);
         _ctxMock.Verify(ctx => ctx.DeleteResponseAsync(), Times.Once);
         _ctxMock.Verify(ctx => ctx.Channel.SendMessageAsync(It.IsAny<string>()), Times.Exactly(2));
-        _openAiServiceMock.Verify(service => service.ChatGpt("Sample Text"), Times.Once);
+        _openAiServiceMock.Verify(service => service.ChatGptAsync("Sample Text"), Times.Once);
     }
 
     [Test]
     public async Task TestImageSlashCommandAsync_Success()
     {
         // Arrange
-        _openAiServiceMock.Setup(service => service.DallE(It.IsAny<string>()))
+        _openAiServiceMock.Setup(service => service.DallEAsync(It.IsAny<string>()))
             .ReturnsAsync(Tuple.Create(true, "https://sample-image-url.com/sample-image.jpg"));
 
         // Act
@@ -108,6 +108,6 @@ public class SlashCommandsServiceTests
                 It.IsAny<DiscordInteractionResponseBuilder>()), Times.Once);
         _ctxMock.Verify(ctx => ctx.DeleteResponseAsync(), Times.Once);
         _ctxMock.Verify(ctx => ctx.Channel.SendMessageAsync(It.IsAny<string>()), Times.Exactly(2));
-        _openAiServiceMock.Verify(service => service.DallE("Sample Text"), Times.Once);
+        _openAiServiceMock.Verify(service => service.DallEAsync("Sample Text"), Times.Once);
     }
 }

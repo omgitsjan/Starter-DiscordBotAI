@@ -1,4 +1,5 @@
 ﻿using DiscordBot.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
@@ -8,25 +9,27 @@ namespace DiscordBot.Services;
 public class Watch2GetherService : IWatch2GetherService
 {
     /// <summary>
-    ///     Api Key to access Watch2Gether Api - (REPLACE THIS WITH YOUR KEY)
+    ///     Api Key to access Watch2Gether Api
     /// </summary>
-    private const string W2GApiKey = "";
+    private string? _w2GApiKey;
 
     /// <summary>
     ///     Url to the CreateRoom Api
     /// </summary>
-    internal const string W2GCreateRoomUrl = "https://api.w2g.tv/rooms/create.json";
+    private string? _w2GCreateRoomUrl;
 
     /// <summary>
     ///     Url to the Room URL
     /// </summary>
-    private const string W2GShowRoomUrl = "https://w2g.tv/rooms/";
+    private string? _w2GShowRoomUrl;
 
     private readonly IRestClient _httpClient;
+    private readonly IConfiguration _configuration;
 
-    public Watch2GetherService(IRestClient httpClient)
+    public Watch2GetherService(IRestClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
+        _configuration = configuration;
     }
 
     /// <summary>
@@ -43,6 +46,19 @@ public class Watch2GetherService : IWatch2GetherService
         string message;
         var success = false;
 
+        // Retrieve the urls and the apikey from the configuration
+        _w2GApiKey = _configuration["Watch2Gether:ApiKey"] ?? string.Empty;
+        _w2GCreateRoomUrl = _configuration["Watch2Gether:CreateRoomUrl"] ?? string.Empty;
+        _w2GShowRoomUrl = _configuration["Watch2Gether:ShowRoomUrl"] ?? string.Empty;
+
+        if (string.IsNullOrEmpty(_w2GApiKey) || string.IsNullOrEmpty(_w2GCreateRoomUrl) ||
+            string.IsNullOrEmpty(_w2GShowRoomUrl))
+        {
+            message = "Could not load necessary configuration, please provide a valid configuration";
+            Program.Log($"{nameof(CreateRoom)}: " + message, LogLevel.Error);
+            return new Tuple<bool, string>(success, message);
+        }
+
         // Initialize a new instance of RestRequest with the Watch2Gether room creation URL and HTTP method.
         var request = new RestRequest("", Method.Post);
 
@@ -51,11 +67,11 @@ public class Watch2GetherService : IWatch2GetherService
         request.AddHeader("Accept", "application/json");
         request.AddJsonBody(new
         {
-            w2g_api_key = W2GApiKey,
+            w2g_api_key = _w2GApiKey,
             share = videoUrl
         });
 
-        request.Resource = W2GCreateRoomUrl;
+        request.Resource = _w2GCreateRoomUrl;
 
         // Send the HTTP request asynchronously and await the response.
         var response = await _httpClient.ExecuteAsync(request);
@@ -72,7 +88,7 @@ public class Watch2GetherService : IWatch2GetherService
         {
             // Deserialize the response content into a dynamic object and extract the streamkey property.
             var responseObj = JsonConvert.DeserializeObject<dynamic>(response.Content);
-            message = W2GShowRoomUrl + responseObj?.streamkey;
+            message = _w2GShowRoomUrl + responseObj?.streamkey;
             success = true;
         }
         catch (Exception e)
