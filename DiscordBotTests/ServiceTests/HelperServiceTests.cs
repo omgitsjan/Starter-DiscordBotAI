@@ -1,4 +1,5 @@
 using DiscordBot.Services;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using RestSharp;
 
@@ -11,7 +12,17 @@ public class HelperServiceTests
     public void Setup()
     {
         _mockRestClient = new Mock<IRestClient>();
-        _helperService = new HelperService(_mockRestClient.Object);
+
+        // Create an in-memory configuration for testing purposes
+        var configurationBuilder = new ConfigurationBuilder();
+        configurationBuilder.AddInMemoryCollection(new[]
+        {
+            new KeyValuePair<string, string>("ByBit:ApiUrlBtc", "https://api.bybit.com/v2/public/tickers"),
+            new KeyValuePair<string, string>("DeveloperExcuse:ApiUrl", "https://dev-excuse-api.herokuapp.com/")
+        });
+        var configuration = configurationBuilder.Build();
+
+        _helperService = new HelperService(_mockRestClient.Object, configuration);
     }
 
     private Mock<IRestClient> _mockRestClient;

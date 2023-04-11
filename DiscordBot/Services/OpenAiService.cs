@@ -55,7 +55,7 @@ public class OpenAiService : IOpenAiService
         if (string.IsNullOrEmpty(_openAiApiKey) || string.IsNullOrEmpty(_chatGptApiUrl))
         {
             const string errorMessage =
-                "No OpenWeatherMap Api Key/Url was provided, please contact the Developer to add a valid Api Key/Url!";
+                "No OpenAI Api Key/Url was provided, please contact the Developer to add a valid Api Key/Url!";
             Program.Log($"{nameof(ChatGptAsync)}: " + errorMessage, LogLevel.Error);
             return new Tuple<bool, string>(success, errorMessage);
         }
@@ -141,7 +141,7 @@ public class OpenAiService : IOpenAiService
         if (string.IsNullOrEmpty(_openAiApiKey) || string.IsNullOrEmpty(_dalleApiUrl))
         {
             const string errorMessage =
-                "No OpenWeatherMap Api Key/Url was provided, please contact the Developer to add a valid Api Key/Url!";
+                "No OpenAI Api Key/Url was provided, please contact the Developer to add a valid Api Key/Url!";
             Program.Log($"{nameof(DallEAsync)}: " + errorMessage, LogLevel.Error);
             return new Tuple<bool, string>(success, errorMessage);
         }
