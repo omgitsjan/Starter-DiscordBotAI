@@ -19,9 +19,10 @@ public class OpenWeatherMapServiceTests
         var configurationBuilder = new ConfigurationBuilder();
         configurationBuilder.AddInMemoryCollection(new[]
         {
-            new KeyValuePair<string, string>("Watch2Gether:ApiKey", "testKey"),
-            new KeyValuePair<string, string>("Watch2Gether:CreateRoomUrl", "https://api.watch2gether.com/rooms/create"),
-            new KeyValuePair<string, string>("Watch2Gether:ShowRoomUrl", "https://w2g.tv/rooms/")
+            new KeyValuePair<string, string?>("Watch2Gether:ApiKey", "testKey"),
+            new KeyValuePair<string, string?>("Watch2Gether:CreateRoomUrl",
+                "https://api.watch2gether.com/rooms/create"),
+            new KeyValuePair<string, string?>("Watch2Gether:ShowRoomUrl", "https://w2g.tv/rooms/")
         });
         var configuration = configurationBuilder.Build();
 
@@ -57,8 +58,8 @@ public class OpenWeatherMapServiceTests
         var configurationBuilder = new ConfigurationBuilder();
         configurationBuilder.AddInMemoryCollection(new[]
         {
-            new KeyValuePair<string, string>("OpenWeatherMap:ApiKey", "testKey"),
-            new KeyValuePair<string, string>("OpenWeatherMap:ApiUrl",
+            new KeyValuePair<string, string?>("OpenWeatherMap:ApiKey", "testKey"),
+            new KeyValuePair<string, string?>("OpenWeatherMap:ApiUrl",
                 "https://api.openweathermap.org/data/2.5/weather?q=")
         });
         var configuration = configurationBuilder.Build();
@@ -99,8 +100,8 @@ public class OpenWeatherMapServiceTests
         var configurationBuilder = new ConfigurationBuilder();
         configurationBuilder.AddInMemoryCollection(new[]
         {
-            new KeyValuePair<string, string>("OpenWeatherMap:ApiKey", ""),
-            new KeyValuePair<string, string>("OpenWeatherMap:ApiUrl",
+            new KeyValuePair<string, string?>("OpenWeatherMap:ApiKey", ""),
+            new KeyValuePair<string, string?>("OpenWeatherMap:ApiUrl",
                 "https://api.openweathermap.org/data/2.5/weather?q=")
         });
         var configuration = configurationBuilder.Build();
@@ -137,8 +138,8 @@ public class OpenWeatherMapServiceTests
         var configurationBuilder = new ConfigurationBuilder();
         configurationBuilder.AddInMemoryCollection(new[]
         {
-            new KeyValuePair<string, string>("OpenWeatherMap:ApiKey", "testKey"),
-            new KeyValuePair<string, string>("OpenWeatherMap:ApiUrl",
+            new KeyValuePair<string, string?>("OpenWeatherMap:ApiKey", "testKey"),
+            new KeyValuePair<string, string?>("OpenWeatherMap:ApiUrl",
                 "https://api.openweathermap.org/data/2.5/weather?q=")
         });
         var configuration = configurationBuilder.Build();
@@ -153,7 +154,8 @@ public class OpenWeatherMapServiceTests
 
         // Assert
         Assert.IsFalse(result.Success);
-        Assert.AreEqual("Failed to fetch weather data. Please check the city name and try again.", result.Message);
+        Assert.That(result.Message,
+            Is.EqualTo("Failed to fetch weather data. Please check the city name and try again."));
         Assert.IsNull(result.weatherData);
     }
 }

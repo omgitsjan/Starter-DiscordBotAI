@@ -18,9 +18,10 @@ public class Watch2GetherServiceTests
         var configurationBuilder = new ConfigurationBuilder();
         configurationBuilder.AddInMemoryCollection(new[]
         {
-            new KeyValuePair<string, string>("Watch2Gether:ApiKey", "testKey"),
-            new KeyValuePair<string, string>("Watch2Gether:CreateRoomUrl", "https://api.watch2gether.com/rooms/create"),
-            new KeyValuePair<string, string>("Watch2Gether:ShowRoomUrl", "https://w2g.tv/rooms/")
+            new KeyValuePair<string, string?>("Watch2Gether:ApiKey", "testKey"),
+            new KeyValuePair<string, string?>("Watch2Gether:CreateRoomUrl",
+                "https://api.watch2gether.com/rooms/create"),
+            new KeyValuePair<string, string?>("Watch2Gether:ShowRoomUrl", "https://w2g.tv/rooms/")
         });
         var configuration = configurationBuilder.Build();
 
@@ -52,7 +53,7 @@ public class Watch2GetherServiceTests
         // Assert
         _mockRestClient.Verify(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default), Times.Once);
         Assert.IsTrue(success);
-        Assert.AreEqual($"https://w2g.tv/rooms/{streamKey}", result);
+        Assert.That(result, Is.EqualTo($"https://w2g.tv/rooms/{streamKey}"));
     }
 
     [Test]
@@ -70,7 +71,7 @@ public class Watch2GetherServiceTests
         // Assert
         _mockRestClient.Verify(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default), Times.Once);
         Assert.IsFalse(success);
-        Assert.AreEqual("No response from Watch2Gether", result);
+        Assert.That(result, Is.EqualTo("No response from Watch2Gether"));
     }
 
     [Test]
@@ -89,6 +90,6 @@ public class Watch2GetherServiceTests
         // Assert
         _mockRestClient.Verify(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default), Times.Once);
         Assert.IsFalse(success);
-        Assert.AreEqual(errorMessage, result);
+        Assert.That(result, Is.EqualTo(errorMessage));
     }
 }

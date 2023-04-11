@@ -17,8 +17,8 @@ public class HelperServiceTests
         var configurationBuilder = new ConfigurationBuilder();
         configurationBuilder.AddInMemoryCollection(new[]
         {
-            new KeyValuePair<string, string>("ByBit:ApiUrlBtc", "https://api.bybit.com/v2/public/tickers"),
-            new KeyValuePair<string, string>("DeveloperExcuse:ApiUrl", "https://dev-excuse-api.herokuapp.com/")
+            new KeyValuePair<string, string?>("ByBit:ApiUrlBtc", "https://api.bybit.com/v2/public/tickers"),
+            new KeyValuePair<string, string?>("DeveloperExcuse:ApiUrl", "https://dev-excuse-api.herokuapp.com/")
         });
         var configuration = configurationBuilder.Build();
 
@@ -45,7 +45,7 @@ public class HelperServiceTests
         var result = await _helperService.GetCurrentBitcoinPriceAsync();
 
         // Assert
-        Assert.AreEqual(expectedPrice, result);
+        Assert.That(result, Is.EqualTo(expectedPrice));
     }
 
     [Test]
@@ -63,7 +63,7 @@ public class HelperServiceTests
         var result = await _helperService.GetRandomDeveloperExcuseAsync();
 
         // Assert
-        Assert.AreEqual(expectedExcuse, result);
+        Assert.That(result, Is.EqualTo(expectedExcuse));
     }
 
     // ...
