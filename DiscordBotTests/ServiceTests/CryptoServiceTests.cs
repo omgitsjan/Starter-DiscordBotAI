@@ -7,7 +7,7 @@ using RestSharp;
 namespace DiscordBotTests.ServiceTests;
 
 [TestFixture]
-public class HelperServiceTests
+public class CryptoServiceTests
 {
     [SetUp]
     public void Setup()
@@ -23,79 +23,75 @@ public class HelperServiceTests
         });
         var configuration = configurationBuilder.Build();
 
-        _helperService = new HelperService(_mockHttpService.Object, configuration);
+        _cryptoService = new CryptoService(_mockHttpService.Object, configuration);
     }
 
     private Mock<IHttpService> _mockHttpService;
-    private HelperService _helperService;
+    private CryptoService _cryptoService;
 
     [Test]
-    public async Task GetRandomDeveloperExcuseAsync_ReturnsRandomDeveloperExcuse()
+    public async Task GetCurrentBitcoinPriceAsync_ReturnsCurrentBitcoinPrice()
     {
         // Arrange
-        const string? jsonResponse = "{\"text\": \"It was a compiler issue.\"}";
-        const string expectedExcuse = "It was a compiler issue.";
+        const string? jsonResponse = "{\"result\": [{\"last_price\": \"50000\"}]}";
+        const string expectedPrice = "50000";
 
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
                 It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
             .ReturnsAsync(new HttpResponse(true, jsonResponse));
 
         // Act
-        var result = await _helperService.GetRandomDeveloperExcuseAsync();
+        var result = await _cryptoService.GetCurrentBitcoinPriceAsync();
 
         // Assert
-        Assert.That(result, Is.EqualTo(expectedExcuse));
+        Assert.That(result, Is.EqualTo(expectedPrice));
     }
 
     [Test]
-    public async Task GetRandomDeveloperExcuseAsync_InvalidJson_ReturnsFallbackMessage()
+    public async Task GetCurrentBitcoinPriceAsync_ApiError_ReturnsErrorMessage()
     {
         // Arrange
-        const string? invalidJson = "Invalid JSON";
-        const string expectedFallbackMessage = "Could not fetch current Developer excuse...";
-
+        const string expectedErrorMessage = "StatusCode: 400 | API Error";
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
                 It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
-            .ReturnsAsync(new HttpResponse(true, invalidJson));
+            .ReturnsAsync(new HttpResponse(false, expectedErrorMessage));
 
         // Act
-        var result = await _helperService.GetRandomDeveloperExcuseAsync();
+        var result = await _cryptoService.GetCurrentBitcoinPriceAsync();
 
         // Assert
-        Assert.That(result, Is.EqualTo(expectedFallbackMessage));
+        Assert.That(result, Is.EqualTo(expectedErrorMessage));
     }
 
     [Test]
-    public async Task GetRandomDeveloperExcuseAsync_NoTextFieldInJson_ReturnsFallbackMessage()
+    public async Task GetCurrentBitcoinPriceAsync_InvalidJson_ReturnsFallbackMessage()
     {
         // Arrange
-        const string? jsonResponse = "{\"not_text\": \"It was a compiler issue.\"}";
-        const string expectedFallbackMessage = "Could not fetch current Developer excuse...";
-
+        const string invalidJsonResponse = "Invalid JSON";
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
                 It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
-            .ReturnsAsync(new HttpResponse(true, jsonResponse));
+            .ReturnsAsync(new HttpResponse(true, invalidJsonResponse));
 
         // Act
-        var result = await _helperService.GetRandomDeveloperExcuseAsync();
+        var result = await _cryptoService.GetCurrentBitcoinPriceAsync();
 
         // Assert
-        Assert.That(result, Is.EqualTo(expectedFallbackMessage));
+        Assert.That(result, Is.EqualTo("Could not fetch current Bitcoin price..."));
     }
 
     [Test]
-    public async Task GetRandomDeveloperExcuseAsync_NonSuccessStatusCode_ReturnsErrorMessage()
+    public async Task GetCurrentBitcoinPriceAsync_MissingLastPrice_ReturnsFallbackMessage()
     {
         // Arrange
-        const string? errorMessage = "Error fetching data.";
+        const string jsonResponseMissingLastPrice = "{\"result\": [{}]}";
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
                 It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
-            .ReturnsAsync(new HttpResponse(false, errorMessage));
+            .ReturnsAsync(new HttpResponse(true, jsonResponseMissingLastPrice));
 
         // Act
-        var result = await _helperService.GetRandomDeveloperExcuseAsync();
+        var result = await _cryptoService.GetCurrentBitcoinPriceAsync();
 
         // Assert
-        Assert.That(result, Is.EqualTo(errorMessage));
+        Assert.That(result, Is.EqualTo("Could not fetch current Bitcoin price..."));
     }
 }

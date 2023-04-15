@@ -1,96 +1,107 @@
-//using DiscordBot.Interfaces;
-//using DiscordBot.Services;
-//using Microsoft.Extensions.Configuration;
-//using Moq;
-//using Newtonsoft.Json;
-//using RestSharp;
+using DiscordBot.Interfaces;
+using DiscordBot.Services;
+using Microsoft.Extensions.Configuration;
+using Moq;
+using Newtonsoft.Json;
+using RestSharp;
 
-//namespace DiscordBotTests.ServiceTests;
+namespace DiscordBotTests.ServiceTests;
 
-//[TestFixture]
-//public class Watch2GetherServiceTests
-//{
-//    [SetUp]
-//    public void Setup()
-//    {
-//        _mockRestClient = new Mock<IRestClient>();
+[TestFixture]
+public class Watch2GetherServiceTests
+{
+    [SetUp]
+    public void Setup()
+    {
+        _mockHttpService = new Mock<IHttpService>();
 
-//        // Create an in-memory configuration for testing purposes
-//        var configurationBuilder = new ConfigurationBuilder();
-//        configurationBuilder.AddInMemoryCollection(new[]
-//        {
-//            new KeyValuePair<string, string?>("Watch2Gether:ApiKey", "testKey"),
-//            new KeyValuePair<string, string?>("Watch2Gether:CreateRoomUrl",
-//                "https://api.watch2gether.com/rooms/create"),
-//            new KeyValuePair<string, string?>("Watch2Gether:ShowRoomUrl", "https://w2g.tv/rooms/")
-//        });
-//        var configuration = configurationBuilder.Build();
+        // Create an in-memory configuration for testing purposes
+        var configurationBuilder = new ConfigurationBuilder();
+        configurationBuilder.AddInMemoryCollection(new[]
+        {
+            new KeyValuePair<string, string?>("Watch2Gether:ApiKey", "testKey"),
+            new KeyValuePair<string, string?>("Watch2Gether:CreateRoomUrl",
+                "https://api.watch2gether.com/rooms/create"),
+            new KeyValuePair<string, string?>("Watch2Gether:ShowRoomUrl", "https://w2g.tv/rooms/")
+        });
+        var configuration = configurationBuilder.Build();
 
-//        _watch2GetherService = new Watch2GetherService(_mockRestClient.Object, configuration);
-//    }
+        _watch2GetherService = new Watch2GetherService(_mockHttpService.Object, configuration);
+    }
 
-//    private Watch2GetherService _watch2GetherService;
-//    private Mock<IHelperService> _mockHelperService;
+    private Watch2GetherService _watch2GetherService;
+    private Mock<IHttpService> _mockHttpService;
 
-//    [Test]
-//    public async Task CreateRoom_SuccessfulRequest_ReturnsSuccessAndRoomUrl()
-//    {
-//        // Arrange
-//        const string videoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-//        const string streamKey = "AbCdEfGhIjKlMnOpQrStUvWxYz";
-//        var expectedResponse = new RestResponse
-//        {
-//            Content = JsonConvert.SerializeObject(new { streamkey = streamKey })
-//        };
+    [Test]
+    public async Task CreateRoom_SuccessfulRequest_ReturnsSuccessAndRoomUrl()
+    {
+        // Arrange
+        const string videoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+        const string streamKey = "AbCdEfGhIjKlMnOpQrStUvWxYz";
+        var jsonResponse = JsonConvert.SerializeObject(new { streamkey = streamKey });
 
-//        //_mockHelperService.Setup(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default))
-//        //    .ReturnsAsync(expectedResponse)
-//        //    .Verifiable();
+        _mockHttpService
+            .Setup(x => x.GetResponseFromUrl(
+                It.IsAny<string>(),
+                It.IsAny<Method>(),
+                It.IsAny<string>(),
+                It.IsAny<List<KeyValuePair<string, string>>?>(),
+                It.IsAny<string>()))
+            .ReturnsAsync(new HttpResponse(true, jsonResponse));
 
+        // Act
+        var (success, result) = await _watch2GetherService.CreateRoom(videoUrl);
 
-//        // Act
-//        var (success, result) = await _watch2GetherService.CreateRoom(videoUrl);
+        // Assert
+        Assert.IsTrue(success);
+        Assert.That(result, Is.EqualTo($"https://w2g.tv/rooms/{streamKey}"));
+    }
 
-//        // Assert
-//        //_mockHelperService.Verify(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default), Times.Once);
-//        Assert.IsTrue(success);
-//        Assert.That(result, Is.EqualTo($"https://w2g.tv/rooms/{streamKey}"));
-//    }
+    [Test]
+    public async Task CreateRoom_EmptyResponse_ReturnsNoResponseError()
+    {
+        // Arrange
+        const string videoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+        const string? expectedErrorMessage = "No response from Watch2Gether";
 
-//    [Test]
-//    public async Task CreateRoom_EmptyResponse_ReturnsNoResponseError()
-//    {
-//        // Arrange
-//        const string videoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-//        var expectedResponse = new RestResponse { Content = string.Empty };
-//        //_mockHelperService.Setup(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default))
-//        //    .ReturnsAsync(expectedResponse);
+        _mockHttpService
+            .Setup(x => x.GetResponseFromUrl(
+                It.IsAny<string>(),
+                It.IsAny<Method>(),
+                It.IsAny<string>(),
+                It.IsAny<List<KeyValuePair<string, string>>?>(),
+                It.IsAny<string>()))
+            .ReturnsAsync(new HttpResponse(false, expectedErrorMessage));
 
-//        // Act
-//        var (success, result) = await _watch2GetherService.CreateRoom(videoUrl);
+        // Act
+        var (success, result) = await _watch2GetherService.CreateRoom(videoUrl);
 
-//        // Assert
-//        //_mockHelperService.Verify(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default), Times.Once);
-//        Assert.IsFalse(success);
-//        Assert.That(result, Is.EqualTo("No response from Watch2Gether"));
-//    }
+        // Assert
+        Assert.IsFalse(success);
+        Assert.That(result, Is.EqualTo(expectedErrorMessage));
+    }
 
-//    [Test]
-//    public async Task CreateRoom_DeserializationError_ReturnsDeserializationError()
-//    {
-//        // Arrange
-//        const string videoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-//        const string errorMessage = "Failed to deserialize response from Watch2Gether";
-//        var expectedResponse = new RestResponse { Content = "invalid json" };
-//        //_mockHelperService.Setup(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default))
-//        //    .ReturnsAsync(expectedResponse);
+    [Test]
+    public async Task CreateRoom_DeserializationError_ReturnsDeserializationError()
+    {
+        // Arrange
+        const string videoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+        const string? errorMessage = "Failed to deserialize response from Watch2Gether";
 
-//        // Act
-//        var (success, result) = await _watch2GetherService.CreateRoom(videoUrl);
+        _mockHttpService
+            .Setup(x => x.GetResponseFromUrl(
+                It.IsAny<string>(),
+                It.IsAny<Method>(),
+                It.IsAny<string>(),
+                It.IsAny<List<KeyValuePair<string, string>>?>(),
+                It.IsAny<string>()))
+            .ReturnsAsync(new HttpResponse(false, errorMessage));
 
-//        // Assert
-//        //_mockHelperService.Verify(x => x.ExecuteAsync(It.IsAny<RestRequest>(), default), Times.Once);
-//        Assert.IsFalse(success);
-//        Assert.That(result, Is.EqualTo(errorMessage));
-//    }
-//}
+        // Act
+        var (success, result) = await _watch2GetherService.CreateRoom(videoUrl);
+
+        // Assert
+        Assert.IsFalse(success);
+        Assert.That(result, Is.EqualTo(errorMessage));
+    }
+}

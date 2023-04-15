@@ -60,7 +60,7 @@ public class Program
         LogManager.LoadConfiguration("nlog.config");
 
         // Load the configuration from the appsettings.json file
-        var configuration = new ConfigurationBuilder()
+        IConfigurationRoot configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json")
             .Build();
@@ -134,9 +134,9 @@ public class Program
             switch (statusIndex)
             {
                 case 0:
-                    var currentBitcoinPrice = await CryptoService.GetCurrentBitcoinPriceAsync();
-                    var activity1 =
-                        new DiscordActivity(
+                    string? currentBitcoinPrice = await CryptoService.GetCurrentBitcoinPriceAsync();
+                    DiscordActivity activity1 =
+                        new(
                             $"BTC: ${(currentBitcoinPrice.Length > 110 ? currentBitcoinPrice[..110] : currentBitcoinPrice)}",
                             ActivityType.Watching);
                     await Client.UpdateStatusAsync(activity1);
@@ -163,7 +163,7 @@ public class Program
                         $"Available to '{memberCount}' Users", ActivityType.Watching));
                     break;
                 case 5:
-                    string developerExcuse = await HelperService.GetRandomDeveloperExcuseAsync();
+                    string? developerExcuse = await HelperService.GetRandomDeveloperExcuseAsync();
                     await Client.UpdateStatusAsync(new DiscordActivity(
                         $"Excuse: {(developerExcuse.Length > 110 ? developerExcuse[..110] : developerExcuse)}",
                         ActivityType.ListeningTo));
@@ -191,7 +191,7 @@ public class Program
     /// <param name="msg"></param>
     /// <param name="logLevel"></param>
     /// <returns></returns>
-    internal static void Log(string msg,
+    internal static void Log(string? msg,
         LogLevel logLevel = LogLevel.Information)
     {
         if (Logger != null)

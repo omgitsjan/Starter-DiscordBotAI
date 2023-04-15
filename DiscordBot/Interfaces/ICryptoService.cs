@@ -1,7 +1,4 @@
-﻿using RestSharp;
-using System.Dynamic;
-
-namespace DiscordBot.Interfaces;
+﻿namespace DiscordBot.Interfaces;
 
 public interface ICryptoService
 {

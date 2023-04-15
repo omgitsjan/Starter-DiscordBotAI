@@ -72,7 +72,7 @@ public class SlashCommandsService : ISlashCommandsService
             new DiscordInteractionResponseBuilder().WithContent("Sending Request to ChatGPT API..."));
 
         // Execute and waiting for the response from our Method
-        (bool success, string message) = await _openAiService.ChatGptAsync(text);
+        (bool success, string? message) = await _openAiService.ChatGptAsync(text);
 
         // Creating embed Message via DiscordEmbedBuilder
         var embedMessage = new DiscordEmbedBuilder

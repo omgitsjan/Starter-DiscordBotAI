@@ -43,11 +43,13 @@ public class OpenWeatherMapService : IOpenWeatherMapService
                 null);
         }
 
-        var response = await _httpService.GetResponseFromURL($"{_openWeatherMapUrl}{Uri.EscapeDataString(city)}&units=metric&appid={_openWeatherMapApiKey}", Method.Post, $"{nameof(GetWeatherAsync)}: Failed to fetch weather data for city '{city}'.");
+        HttpResponse response = await _httpService.GetResponseFromUrl(
+            $"{_openWeatherMapUrl}{Uri.EscapeDataString(city)}&units=metric&appid={_openWeatherMapApiKey}", Method.Post,
+            $"{nameof(GetWeatherAsync)}: Failed to fetch weather data for city '{city}'.");
 
         if (!response.IsSuccessStatusCode)
         {
-            return (false, response.Content, null);
+            return (false, response.Content ?? "", null);
         }
 
         var json = JObject.Parse(response.Content ?? "");
