@@ -1,7 +1,7 @@
 ﻿using DiscordBot.Interfaces;
 using Microsoft.Extensions.Logging;
-using RestSharp;
 using Newtonsoft.Json;
+using RestSharp;
 
 namespace DiscordBot.Services;
 
@@ -18,7 +18,8 @@ public class HttpService : IHttpService
     ///     Gets the response from an URL and handles errors
     /// </summary>
     /// <returns>The current price from bitcoin as BTCUSD string</returns>
-    public async Task<HttpResponse> GetResponseFromURL(string resource, Method method = Method.Get, string? errorMessage = null, List<KeyValuePair<string, string>> headers = null, string jsonBodyString = null)
+    public async Task<HttpResponse> GetResponseFromUrl(string resource, Method method = Method.Get,
+        string? errorMessage = null, List<KeyValuePair<string, string>>? headers = null, string jsonBodyString = "")
     {
         var request = new RestRequest(resource, method);
 
@@ -27,9 +28,9 @@ public class HttpService : IHttpService
             headers.ForEach(header => request.AddHeader(header.Key, header.Value));
         }
 
-        if (!String.IsNullOrEmpty(jsonBodyString))
+        if (!string.IsNullOrEmpty(jsonBodyString))
         {
-            request.AddJsonBody(JsonConvert.DeserializeObject<object>(jsonBodyString));
+            request.AddJsonBody(JsonConvert.DeserializeObject(jsonBodyString) ?? "");
         }
 
         // Send the HTTP request asynchronously and await the response.
@@ -49,11 +50,11 @@ public class HttpService : IHttpService
 public class HttpResponse
 {
     public bool IsSuccessStatusCode { get; set; }
-    public string Content { get; set; }
+    public string? Content { get; set; }
 
-    public HttpResponse(bool IsSuccessStatusCode, string Content)
+    public HttpResponse(bool isSuccessStatusCode, string? content)
     {
-        this.IsSuccessStatusCode = IsSuccessStatusCode;
-        this.Content = Content;
+        IsSuccessStatusCode = isSuccessStatusCode;
+        Content = content;
     }
 }

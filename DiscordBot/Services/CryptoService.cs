@@ -1,6 +1,7 @@
 ﻿using DiscordBot.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace DiscordBot.Services;
@@ -31,21 +32,28 @@ public class CryptoService : ICryptoService
 
         if (string.IsNullOrEmpty(_byBitApiUrlBtc))
         {
-            const string errorMessage =
+            const string? errorMessage =
                 "No ByBit Api Url was provided, please contact the Developer to add a valid Api Url!";
             Program.Log($"{nameof(GetCurrentBitcoinPriceAsync)}: " + errorMessage, LogLevel.Error);
             return errorMessage;
         }
 
-        var response = await _httpService.GetResponseFromURL(_byBitApiUrlBtc);
+        HttpResponse response = await _httpService.GetResponseFromUrl(_byBitApiUrlBtc);
 
         if (!response.IsSuccessStatusCode)
         {
-            return response.Content;
+            return response.Content ?? "";
         }
 
-        var json = JObject.Parse(response.Content ?? "{}");
-
-        return json["result"]?[0]?["last_price"]?.Value<string>() ?? "Could not fetch current Bitcoin price...";
+        try
+        {
+            JObject json = JObject.Parse(response.Content ?? "{}");
+            return json["result"]?[0]?["last_price"]?.Value<string>() ?? "Could not fetch current Bitcoin price...";
+        }
+        catch (JsonReaderException ex)
+        {
+            Program.Log($"{nameof(GetCurrentBitcoinPriceAsync)}: " + ex.Message, LogLevel.Error);
+            return "Could not fetch current Bitcoin price...";
+        }
     }
 }
