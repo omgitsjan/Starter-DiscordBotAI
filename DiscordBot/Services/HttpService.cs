@@ -33,8 +33,21 @@ public class HttpService : IHttpService
             request.AddJsonBody(JsonConvert.DeserializeObject(jsonBodyString) ?? "");
         }
 
+        var response = new RestResponse();
+
         // Send the HTTP request asynchronously and await the response.
-        var response = await _httpClient.ExecuteAsync(request);
+        try
+        {
+            response = await _httpClient.ExecuteAsync(request);
+        }
+        catch (Exception e)
+        {
+            response.IsSuccessStatusCode = false;
+            response.ErrorMessage = $"({nameof(GetResponseFromUrl)}): Unknown error occurred" + e.Message;
+            response.ErrorException = e;
+            response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+        }
+
         var content = response.Content;
 
         if (!response.IsSuccessStatusCode)

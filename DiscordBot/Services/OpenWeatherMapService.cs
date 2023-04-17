@@ -31,8 +31,8 @@ public class OpenWeatherMapService : IOpenWeatherMapService
     public async Task<(bool Success, string Message, WeatherData? weatherData)> GetWeatherAsync(string city)
     {
         // Retrieve the url and the apikey from the configuration
-        _openWeatherMapUrl = _configuration["OpenWeatherMap:ApiKey"] ?? string.Empty;
-        _openWeatherMapApiKey = _configuration["OpenWeatherMap:ApiUrl"] ?? string.Empty;
+        _openWeatherMapUrl = _configuration["OpenWeatherMap:ApiUrl"] ?? string.Empty;
+        _openWeatherMapApiKey = _configuration["OpenWeatherMap:ApiKey"] ?? string.Empty;
 
         if (string.IsNullOrEmpty(_openWeatherMapApiKey) || string.IsNullOrEmpty(_openWeatherMapUrl))
         {
