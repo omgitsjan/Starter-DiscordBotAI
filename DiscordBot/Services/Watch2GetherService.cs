@@ -71,7 +71,7 @@ namespace DiscordBot.Services
             };
 
             HttpResponse response = await _httpService.GetResponseFromUrl(_w2GCreateRoomUrl, Method.Post,
-                $"{nameof(CreateRoom)}: No response from Watch2Gether", headers, JsonConvert.SerializeObject(data));
+                $"{nameof(CreateRoom)}: No response from Watch2Gether", headers, data);
 
             message = response.Content;
 

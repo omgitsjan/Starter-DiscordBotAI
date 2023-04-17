@@ -54,7 +54,7 @@ public class OpenAiServiceTests
 
 
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(true, jsonResponse));
 
         // Act
@@ -87,7 +87,7 @@ public class OpenAiServiceTests
             configuration);
 
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(false, string.Empty));
 
         // Act
@@ -119,7 +119,7 @@ public class OpenAiServiceTests
             configuration);
 
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(true, jsonResponse));
 
 
@@ -152,7 +152,7 @@ public class OpenAiServiceTests
             configuration);
 
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(false, expectedError));
 
         // Act
@@ -184,7 +184,7 @@ public class OpenAiServiceTests
             configuration);
 
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(true, jsonResponse));
 
         // Act
@@ -216,7 +216,7 @@ public class OpenAiServiceTests
             configuration);
 
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(false, expectedError));
 
         // Act
@@ -249,7 +249,7 @@ public class OpenAiServiceTests
             configuration);
 
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(true, jsonResponse));
 
         // Act
@@ -282,7 +282,7 @@ public class OpenAiServiceTests
             configuration);
 
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(false, string.Empty));
 
         // Act

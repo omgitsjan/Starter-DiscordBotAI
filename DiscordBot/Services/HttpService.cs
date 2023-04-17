@@ -1,6 +1,5 @@
 ﻿using DiscordBot.Interfaces;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using RestSharp;
 
 namespace DiscordBot.Services;
@@ -19,7 +18,7 @@ public class HttpService : IHttpService
     /// </summary>
     /// <returns>The current price from bitcoin as BTCUSD string</returns>
     public async Task<HttpResponse> GetResponseFromUrl(string resource, Method method = Method.Get,
-        string? errorMessage = null, List<KeyValuePair<string, string>>? headers = null, string jsonBodyString = "")
+        string? errorMessage = null, List<KeyValuePair<string, string>>? headers = null, object? jsonBody = null)
     {
         var request = new RestRequest(resource, method);
 
@@ -28,9 +27,9 @@ public class HttpService : IHttpService
             headers.ForEach(header => request.AddHeader(header.Key, header.Value));
         }
 
-        if (!string.IsNullOrEmpty(jsonBodyString))
+        if (jsonBody != null)
         {
-            request.AddJsonBody(JsonConvert.DeserializeObject(jsonBodyString) ?? "");
+            request.AddJsonBody(jsonBody);
         }
 
         var response = new RestResponse();

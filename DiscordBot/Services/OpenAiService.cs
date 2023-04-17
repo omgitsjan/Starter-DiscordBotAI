@@ -82,7 +82,7 @@ namespace DiscordBot.Services
             };
 
             HttpResponse response = await _httpService.GetResponseFromUrl(_chatGptApiUrl, Method.Post,
-                $"{nameof(ChatGptAsync)}: Unknown error occurred", headers, JsonConvert.SerializeObject(data));
+                $"{nameof(ChatGptAsync)}: Unknown error occurred", headers, data);
 
             if (response.IsSuccessStatusCode && response.Content != null)
             {
@@ -158,7 +158,7 @@ namespace DiscordBot.Services
 
             HttpResponse response = await _httpService.GetResponseFromUrl(_dalleApiUrl, Method.Post,
                 $"{nameof(DallEAsync)}: Received a failed response from the Dall-E API.", headers,
-                JsonConvert.SerializeObject(data));
+                data);
 
             // Check the status code of the response
             if (response.IsSuccessStatusCode && response.Content != null)
