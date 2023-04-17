@@ -90,20 +90,20 @@ public class HttpServiceTests
     {
         // Arrange
         const string resource = "https://api.example.com/test";
-        var jsonBodyString = JsonConvert.SerializeObject(new { key = "value" });
+        var jsonBody = JsonConvert.SerializeObject(new { key = "value" });
         var response = new RestResponse { StatusCode = HttpStatusCode.OK, IsSuccessStatusCode = true };
         RestRequest? capturedRequest = null;
         _mockRestClient.Setup(client => client.ExecuteAsync(It.IsAny<RestRequest>(), It.IsAny<CancellationToken>()))
             .Callback<RestRequest, CancellationToken>((r, _) => capturedRequest = r).ReturnsAsync(response);
 
         // Act
-        await _httpService.GetResponseFromUrl(resource, jsonBodyString: jsonBodyString);
+        await _httpService.GetResponseFromUrl(resource, jsonBody: jsonBody);
 
         // Assert
         Assert.IsNotNull(capturedRequest);
         var requestBodyParameter = capturedRequest?.Parameters.FirstOrDefault(p =>
             p.Type.Equals(ParameterType.RequestBody) && p.ContentType.Equals("application/json"));
         Assert.IsNotNull(requestBodyParameter);
-        Assert.AreEqual(jsonBodyString, JsonConvert.SerializeObject(requestBodyParameter?.Value));
+        Assert.AreEqual(jsonBody, requestBodyParameter?.Value);
     }
 }

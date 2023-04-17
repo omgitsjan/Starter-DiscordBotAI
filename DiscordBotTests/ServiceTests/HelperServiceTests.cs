@@ -37,7 +37,7 @@ public class HelperServiceTests
         const string expectedExcuse = "It was a compiler issue.";
 
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(true, jsonResponse));
 
         // Act
@@ -55,7 +55,7 @@ public class HelperServiceTests
         const string expectedFallbackMessage = "Could not fetch current Developer excuse...";
 
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(true, invalidJson));
 
         // Act
@@ -73,7 +73,7 @@ public class HelperServiceTests
         const string expectedFallbackMessage = "Could not fetch current Developer excuse...";
 
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(true, jsonResponse));
 
         // Act
@@ -89,7 +89,7 @@ public class HelperServiceTests
         // Arrange
         const string? errorMessage = "Error fetching data.";
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(false, errorMessage));
 
         // Act

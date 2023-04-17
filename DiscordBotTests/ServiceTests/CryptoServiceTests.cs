@@ -37,7 +37,7 @@ public class CryptoServiceTests
         const string expectedPrice = "50000";
 
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(true, jsonResponse));
 
         // Act
@@ -53,7 +53,7 @@ public class CryptoServiceTests
         // Arrange
         const string expectedErrorMessage = "StatusCode: 400 | API Error";
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(false, expectedErrorMessage));
 
         // Act
@@ -69,7 +69,7 @@ public class CryptoServiceTests
         // Arrange
         const string invalidJsonResponse = "Invalid JSON";
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(true, invalidJsonResponse));
 
         // Act
@@ -85,7 +85,7 @@ public class CryptoServiceTests
         // Arrange
         const string jsonResponseMissingLastPrice = "{\"result\": [{}]}";
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<string>()))
+                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(true, jsonResponseMissingLastPrice));
 
         // Act

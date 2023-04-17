@@ -46,7 +46,7 @@ public class Watch2GetherServiceTests
                 It.IsAny<Method>(),
                 It.IsAny<string>(),
                 It.IsAny<List<KeyValuePair<string, string>>?>(),
-                It.IsAny<string>()))
+                It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(true, jsonResponse));
 
         // Act
@@ -70,7 +70,7 @@ public class Watch2GetherServiceTests
                 It.IsAny<Method>(),
                 It.IsAny<string>(),
                 It.IsAny<List<KeyValuePair<string, string>>?>(),
-                It.IsAny<string>()))
+                It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(false, expectedErrorMessage));
 
         // Act
@@ -94,7 +94,7 @@ public class Watch2GetherServiceTests
                 It.IsAny<Method>(),
                 It.IsAny<string>(),
                 It.IsAny<List<KeyValuePair<string, string>>?>(),
-                It.IsAny<string>()))
+                It.IsAny<object>()))
             .ReturnsAsync(new HttpResponse(false, errorMessage));
 
         // Act
