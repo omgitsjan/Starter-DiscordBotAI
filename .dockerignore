@@ -1,0 +1,7 @@
+**/.dockerignore
+**/.git
+**/.gitignore
+**/.DS_Store
+**/*obj/
+**/*bin/
+**/node_modules/
