@@ -62,6 +62,19 @@ The bot will respond with the current Weather to a specific city.
 
 Retruns the Latency Pong...
 
+
+## Docker Image
+
+DiscordBotAI now has an official Docker image available on [Docker Hub](https://hub.docker.com/r/omgitsjan/discordbotai). You can use this image to easily run the Discord bot in a Docker container.
+
+However, please note that in order to use the Docker image effectively, you need to provide your own `appsettings.json` configuration file. This file contains the necessary settings for the bot to function properly. You can find a template for the configuration file in the GitHub repository.
+
+If you choose to use the official Docker image, make sure to mount your own `appsettings.json` file into the container or overwrite the default one with your own. This ensures that the bot has the correct configuration to run.
+
+Alternatively, you can also build and run the Discord bot locally by using the provided `run.ps1` and `build.ps1` scripts. These scripts handle the necessary build steps and configuration setup for local development.
+
+Please refer to the repository's README for detailed instructions on running the bot locally and using the Docker image with the required configuration. Feel free to contribute, raise issues, or submit pull requests on the GitHub repository.
+
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](https://github.com/omgitsjan/DiscordBot/blob/main/LICENSE) for details.
