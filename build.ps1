@@ -1,7 +1,7 @@
 # Build script
 param(
     [string]$dockerfilePath = "Dockerfile",
-    [string]$imageName = "discord-bot",
+    [string]$imageName = "discordbotai",
     [string]$tag = "latest"
 )
 
