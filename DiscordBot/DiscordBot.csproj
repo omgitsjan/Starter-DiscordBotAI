@@ -1,46 +1,46 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
-    <RootNamespace>DiscordBot</RootNamespace>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageLicenseFile>README.md</PackageLicenseFile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net7.0</TargetFramework>
+		<RootNamespace>DiscordBot</RootNamespace>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>README.md</PackageLicenseFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include=".editorconfig" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include=".editorconfig" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.4.1" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.4.1" />
-    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.4.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="5.3.0" />
-    <PackageReference Include="RestSharp" Version="110.2.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="DSharpPlus" Version="4.4.1" />
+		<PackageReference Include="DSharpPlus.Interactivity" Version="4.4.1" />
+		<PackageReference Include="DSharpPlus.SlashCommands" Version="4.4.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+		<PackageReference Include="NLog.Extensions.Logging" Version="5.3.0" />
+		<PackageReference Include="RestSharp" Version="110.2.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="nlog.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Update="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="nlog.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <EditorConfigFiles Remove=".editorconfig" />
-  </ItemGroup>
+	<ItemGroup>
+		<EditorConfigFiles Remove=".editorconfig" />
+	</ItemGroup>
 
 </Project>

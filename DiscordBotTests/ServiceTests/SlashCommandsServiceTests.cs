@@ -12,10 +12,10 @@ namespace DiscordBotTests.ServiceTests;
 public class SlashCommandsServiceTests
 {
     private Mock<IInteractionContextWrapper> _ctxMock;
-    private Mock<IWatch2GetherService> _watch2GetherServiceMock;
-    private Mock<IOpenWeatherMapService> _openWeatherMapServiceMock;
     private Mock<IOpenAiService> _openAiServiceMock;
+    private Mock<IOpenWeatherMapService> _openWeatherMapServiceMock;
     private SlashCommandsService _slashCommandsService;
+    private Mock<IWatch2GetherService> _watch2GetherServiceMock;
 
     [SetUp]
     public void Setup()

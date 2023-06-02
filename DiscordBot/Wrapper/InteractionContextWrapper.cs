@@ -2,41 +2,42 @@
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 
-namespace DiscordBot.Wrapper;
-
-public class InteractionContextWrapper : IInteractionContextWrapper
+namespace DiscordBot.Wrapper
 {
-    private readonly InteractionContext _context;
-    private DiscordChannel? _discordChannel;
-    private DiscordUser? _discordUser;
-
-    public void SetUpForTesting(DiscordChannel? discordChannel, DiscordUser? discordUser)
+    public class InteractionContextWrapper : IInteractionContextWrapper
     {
-        _discordChannel = discordChannel;
-        _discordUser = discordUser;
-    }
+        private readonly InteractionContext _context;
+        private DiscordChannel? _discordChannel;
+        private DiscordUser? _discordUser;
 
-    public InteractionContextWrapper(InteractionContext context)
-    {
-        _context = context;
-    }
+        public InteractionContextWrapper(InteractionContext context)
+        {
+            _context = context;
+        }
 
-    public DiscordChannel Channel => _discordChannel ?? _context.Channel;
+        public void SetUpForTesting(DiscordChannel? discordChannel, DiscordUser? discordUser)
+        {
+            _discordChannel = discordChannel;
+            _discordUser = discordUser;
+        }
 
-    public DiscordUser User => _discordUser ?? _context.User;
+        public DiscordChannel Channel => _discordChannel ?? _context.Channel;
 
-    public Task CreateResponseAsync(InteractionResponseType type, DiscordInteractionResponseBuilder? builder = null)
-    {
-        return _context.CreateResponseAsync(type, builder);
-    }
+        public DiscordUser User => _discordUser ?? _context.User;
 
-    public Task<DiscordMessage> SendMessageAsync(string content, DiscordEmbed? embed = null)
-    {
-        return _context.Channel.SendMessageAsync(content, embed);
-    }
+        public Task CreateResponseAsync(InteractionResponseType type, DiscordInteractionResponseBuilder? builder = null)
+        {
+            return _context.CreateResponseAsync(type, builder);
+        }
 
-    public Task DeleteResponseAsync()
-    {
-        return _context.DeleteResponseAsync();
+        public Task DeleteResponseAsync()
+        {
+            return _context.DeleteResponseAsync();
+        }
+
+        public Task<DiscordMessage> SendMessageAsync(string content, DiscordEmbed? embed = null)
+        {
+            return _context.Channel.SendMessageAsync(content, embed);
+        }
     }
 }

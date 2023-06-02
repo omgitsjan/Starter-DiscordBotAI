@@ -1,8 +1,9 @@
-﻿namespace DiscordBot.Interfaces;
-
-public interface IOpenAiService
+﻿namespace DiscordBot.Interfaces
 {
-    public Task<Tuple<bool, string>> ChatGptAsync(string message);
+    public interface IOpenAiService
+    {
+        public Task<Tuple<bool, string>> ChatGptAsync(string message);
 
-    public Task<Tuple<bool, string>> DallEAsync(string message);
+        public Task<Tuple<bool, string>> DallEAsync(string message);
+    }
 }

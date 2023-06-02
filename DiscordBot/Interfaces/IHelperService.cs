@@ -1,6 +1,7 @@
-﻿namespace DiscordBot.Interfaces;
-
-public interface IHelperService
+﻿namespace DiscordBot.Interfaces
 {
-    public Task<string> GetRandomDeveloperExcuseAsync();
+    public interface IHelperService
+    {
+        public Task<string> GetRandomDeveloperExcuseAsync();
+    }
 }

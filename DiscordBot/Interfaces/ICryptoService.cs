@@ -1,6 +1,7 @@
-﻿namespace DiscordBot.Interfaces;
-
-public interface ICryptoService
+﻿namespace DiscordBot.Interfaces
 {
-    public Task<string> GetCurrentBitcoinPriceAsync();
+    public interface ICryptoService
+    {
+        public Task<string> GetCurrentBitcoinPriceAsync();
+    }
 }

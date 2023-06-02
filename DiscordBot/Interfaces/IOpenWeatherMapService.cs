@@ -1,8 +1,9 @@
 ﻿using DiscordBot.Models;
 
-namespace DiscordBot.Interfaces;
-
-public interface IOpenWeatherMapService
+namespace DiscordBot.Interfaces
 {
-    public Task<(bool Success, string Message, WeatherData? weatherData)> GetWeatherAsync(string city);
+    public interface IOpenWeatherMapService
+    {
+        public Task<(bool Success, string Message, WeatherData? weatherData)> GetWeatherAsync(string city);
+    }
 }

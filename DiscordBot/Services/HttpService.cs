@@ -3,73 +3,74 @@ using DiscordBot.Interfaces;
 using Microsoft.Extensions.Logging;
 using RestSharp;
 
-namespace DiscordBot.Services;
-
-public class HttpService : IHttpService
+namespace DiscordBot.Services
 {
-    private readonly IRestClient _httpClient;
-
-    public HttpService(IRestClient httpClient)
+    public class HttpService : IHttpService
     {
-        _httpClient = httpClient;
-    }
+        private readonly IRestClient _httpClient;
 
-    /// <summary>
-    ///     Gets the response from an URL and handles errors
-    /// </summary>
-    /// <returns>The current price from bitcoin as BTCUSD string</returns>
-    public async Task<HttpResponse> GetResponseFromUrl(string resource, Method method = Method.Get,
-        string? errorMessage = null, List<KeyValuePair<string, string>>? headers = null, object? jsonBody = null)
-    {
-        var request = new RestRequest(resource, method);
-
-        if (headers != null && headers.Any())
+        public HttpService(IRestClient httpClient)
         {
-            headers.ForEach(header => request.AddHeader(header.Key, header.Value));
+            _httpClient = httpClient;
         }
 
-        if (jsonBody != null)
+        /// <summary>
+        ///     Gets the response from an URL and handles errors
+        /// </summary>
+        /// <returns>The current price from bitcoin as BTCUSD string</returns>
+        public async Task<HttpResponse> GetResponseFromUrl(string resource, Method method = Method.Get,
+            string? errorMessage = null, List<KeyValuePair<string, string>>? headers = null, object? jsonBody = null)
         {
-            request.AddJsonBody(jsonBody);
-        }
+            RestRequest request = new RestRequest(resource, method);
 
-        var response = new RestResponse();
+            if (headers != null && headers.Any())
+            {
+                headers.ForEach(header => request.AddHeader(header.Key, header.Value));
+            }
 
-        // Send the HTTP request asynchronously and await the response.
-        try
-        {
-            response = await _httpClient.ExecuteAsync(request);
-        }
-        catch (Exception e)
-        {
-            response.IsSuccessStatusCode = false;
-            response.ErrorMessage = $"({nameof(GetResponseFromUrl)}): Unknown error occurred" + e.Message;
-            response.ErrorException = e;
-            response.StatusCode = HttpStatusCode.InternalServerError;
-        }
+            if (jsonBody != null)
+            {
+                request.AddJsonBody(jsonBody);
+            }
 
-        var content = response.Content;
+            RestResponse response = new RestResponse();
 
-        if (response.IsSuccessStatusCode)
-        {
+            // Send the HTTP request asynchronously and await the response.
+            try
+            {
+                response = await _httpClient.ExecuteAsync(request);
+            }
+            catch (Exception e)
+            {
+                response.IsSuccessStatusCode = false;
+                response.ErrorMessage = $"({nameof(GetResponseFromUrl)}): Unknown error occurred" + e.Message;
+                response.ErrorException = e;
+                response.StatusCode = HttpStatusCode.InternalServerError;
+            }
+
+            string? content = response.Content;
+
+            if (response.IsSuccessStatusCode)
+            {
+                return new HttpResponse(response.IsSuccessStatusCode, content);
+            }
+
+            content = $"StatusCode: {response.StatusCode} | {errorMessage ?? response.ErrorMessage}";
+            Program.Log(content, LogLevel.Error);
+
             return new HttpResponse(response.IsSuccessStatusCode, content);
         }
-
-        content = $"StatusCode: {response.StatusCode} | {errorMessage ?? response.ErrorMessage}";
-        Program.Log(content, LogLevel.Error);
-
-        return new HttpResponse(response.IsSuccessStatusCode, content);
     }
-}
 
-public class HttpResponse
-{
-    public bool IsSuccessStatusCode { get; set; }
-    public string? Content { get; set; }
-
-    public HttpResponse(bool isSuccessStatusCode, string? content)
+    public class HttpResponse
     {
-        IsSuccessStatusCode = isSuccessStatusCode;
-        Content = content;
+        public HttpResponse(bool isSuccessStatusCode, string? content)
+        {
+            IsSuccessStatusCode = isSuccessStatusCode;
+            Content = content;
+        }
+
+        public bool IsSuccessStatusCode { get; set; }
+        public string? Content { get; set; }
     }
 }

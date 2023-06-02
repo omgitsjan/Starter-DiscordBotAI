@@ -10,15 +10,15 @@ namespace DiscordBotTests.ServiceTests;
 [TestFixture]
 public class HttpServiceTests
 {
-    private Mock<IRestClient> _mockRestClient;
-    private IHttpService _httpService;
-
     [SetUp]
     public void SetUp()
     {
         _mockRestClient = new Mock<IRestClient>();
         _httpService = new HttpService(_mockRestClient.Object);
     }
+
+    private Mock<IRestClient> _mockRestClient;
+    private IHttpService _httpService;
 
     [Test]
     public async Task GetResponseFromURL_WithValidResponse_ReturnsSuccess()

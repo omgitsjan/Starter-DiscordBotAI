@@ -1,6 +1,7 @@
-﻿namespace DiscordBot.Interfaces;
-
-public interface IWatch2GetherService
+﻿namespace DiscordBot.Interfaces
 {
-    public Task<Tuple<bool, string?>> CreateRoom(string videoUrl);
+    public interface IWatch2GetherService
+    {
+        public Task<Tuple<bool, string?>> CreateRoom(string videoUrl);
+    }
 }
