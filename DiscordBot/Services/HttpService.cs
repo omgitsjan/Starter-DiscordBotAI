@@ -1,4 +1,5 @@
-﻿using DiscordBot.Interfaces;
+﻿using System.Net;
+using DiscordBot.Interfaces;
 using Microsoft.Extensions.Logging;
 using RestSharp;
 
@@ -44,16 +45,18 @@ public class HttpService : IHttpService
             response.IsSuccessStatusCode = false;
             response.ErrorMessage = $"({nameof(GetResponseFromUrl)}): Unknown error occurred" + e.Message;
             response.ErrorException = e;
-            response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+            response.StatusCode = HttpStatusCode.InternalServerError;
         }
 
         var content = response.Content;
 
-        if (!response.IsSuccessStatusCode)
+        if (response.IsSuccessStatusCode)
         {
-            content = $"StatusCode: {response.StatusCode} | {errorMessage ?? response.ErrorMessage}";
-            Program.Log(content, LogLevel.Error);
+            return new HttpResponse(response.IsSuccessStatusCode, content);
         }
+
+        content = $"StatusCode: {response.StatusCode} | {errorMessage ?? response.ErrorMessage}";
+        Program.Log(content, LogLevel.Error);
 
         return new HttpResponse(response.IsSuccessStatusCode, content);
     }

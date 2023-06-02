@@ -1,6 +1,7 @@
 ﻿using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using DiscordBot.Interfaces;
+using DiscordBot.Models;
 using DiscordBot.Wrapper;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -216,7 +217,7 @@ public class SlashCommandsService : ISlashCommandsService
             new DiscordInteractionResponseBuilder().WithContent("Fetching weather data..."));
 
         // Call GetWeatherAsync to fetch the weather data for the specified city
-        var (success, message, weather) = await _openWeatherMapService.GetWeatherAsync(city);
+        (bool success, string message, WeatherData? weather) = await _openWeatherMapService.GetWeatherAsync(city);
 
         if (success)
         {

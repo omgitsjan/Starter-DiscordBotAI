@@ -57,7 +57,7 @@ public class Program
     public async Task MainAsync()
     {
         // Configure NLog
-        LogManager.LoadConfiguration("nlog.config");
+        LogManager.Setup().LoadConfigurationFromFile("nlog.config");
 
         // Load the configuration from the appsettings.json file
         IConfigurationRoot configuration = new ConfigurationBuilder()
@@ -153,7 +153,7 @@ public class Program
                     break;
                 case 3:
                     TimeSpan uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime();
-                    string uptimeString = $"{uptime.Hours}h {uptime.Minutes}m {uptime.Seconds}s";
+                    string uptimeString = $"{uptime.Days}d {uptime.Hours}h {uptime.Minutes}m";
                     await Client.UpdateStatusAsync(
                         new DiscordActivity($"Uptime: {uptimeString}", ActivityType.Watching));
                     break;
