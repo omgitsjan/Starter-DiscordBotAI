@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  discordbotai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - TAG=latest
+    volumes:
+      - ./DiscordBot/appsettings.json:/app/appsettings.json
+    ports:
+      - 80:80
