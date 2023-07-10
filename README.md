@@ -71,7 +71,7 @@ However, please note that in order to use the Docker image effectively, you need
 
 If you choose to use the official Docker image, make sure to mount your own `appsettings.json` file into the container or overwrite the default one with your own. This ensures that the bot has the correct configuration to run.
 
-Alternatively, you can also build and run the Discord bot locally by using the provided `run.ps1` and `build.ps1` scripts. These scripts handle the necessary build steps and configuration setup for local development.
+You can alternatively build and run the Discord bot locally using the provided `docker-compose.yml` file. This Docker Compose configuration handles the necessary build steps and setup for local development.
 
 Please refer to the repository's README for detailed instructions on running the bot locally and using the Docker image with the required configuration. Feel free to contribute, raise issues, or submit pull requests on the GitHub repository.
 
