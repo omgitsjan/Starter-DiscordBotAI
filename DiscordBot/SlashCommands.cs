@@ -59,5 +59,14 @@ namespace DiscordBot
             InteractionContextWrapper context = new InteractionContextWrapper(ctx);
             await _slashCommandsService.WeatherSlashCommandAsync(context, city);
         }
+
+        [SlashCommand("crypto",
+            "Gets the price for a given Cryptocurrency")]
+        public async Task CryptoSlashCommand(InteractionContext ctx,
+            [Option("Symbol", "The Cryptocurrency you want to get the price for")]
+            string symbol = "") {
+            InteractionContextWrapper context = new InteractionContextWrapper(ctx);
+            await _slashCommandsService.CryptoSlashCommandAsync(context, symbol);
+        }
     }
 }

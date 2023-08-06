@@ -13,14 +13,17 @@ namespace DiscordBot.Services
         private readonly IOpenAiService _openAiService;
         private readonly IOpenWeatherMapService _openWeatherMapService;
         private readonly IWatch2GetherService _watch2GetherService;
+        private readonly ICryptoService _cryptoService;
 
         public SlashCommandsService(IWatch2GetherService watch2GetherService,
             IOpenWeatherMapService openWeatherMapService,
-            IOpenAiService openAiService)
+            IOpenAiService openAiService,
+            ICryptoService cryptoService)
         {
             _watch2GetherService = watch2GetherService;
             _openWeatherMapService = openWeatherMapService;
             _openAiService = openAiService;
+            _cryptoService = cryptoService;
         }
 
         public async Task PingSlashCommandAsync(IInteractionContextWrapper ctx)
@@ -264,6 +267,52 @@ namespace DiscordBot.Services
                 Program.Log(
                     $"Command '{nameof(WeatherSlashCommandAsync)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}). City: {city}");
             }
+        }       
+
+        public async Task CryptoSlashCommandAsync(IInteractionContextWrapper ctx, string symbol = "BTC") {
+            symbol = symbol.ToUpper();
+
+            // Send a "thinking" response to let the user know that the bot is working on their request
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().WithContent(
+                    "Requesting " + symbol + " from ByBit API..."));
+
+            // Call GetCryptoPriceAsync to get the current Price
+            (bool success, string? message) = await _cryptoService.GetCryptoPriceAsync(symbol);
+            Program.Log("MEsae: " + message);
+
+            if (success) {
+                DiscordEmbedBuilder embedMessage = new DiscordEmbedBuilder
+                {
+                    Title = $"{symbol}USDT - ${message}",
+                    Description = $"Price of {symbol}USDT is ${message}",
+                    Author = new DiscordEmbedBuilder.EmbedAuthor
+                    {
+                        Name = ctx.User.Username,
+                        IconUrl = ctx.User.AvatarUrl
+                    },
+                    Footer = new DiscordEmbedBuilder.EmbedFooter
+                    {
+                        Text = "Data provided by ByBit",
+                        IconUrl = "https://seeklogo.com/images/B/bybit-logo-4C31FD6A08-seeklogo.com.png"
+                    },
+                    Timestamp = DateTimeOffset.UtcNow
+                };
+
+                await ctx.Channel.SendMessageAsync(embedMessage);
+            } else {
+                await ctx.Channel.SendMessageAsync(message);
+            }
+
+            // Deleting the thinking state
+            await ctx.DeleteResponseAsync();
+
+            // Logging the success of the command with message and user details
+            if (success) {
+                Program.Log(
+                    $"Command '{nameof(CryptoSlashCommandAsync)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}). Symbol: {symbol}");
+            }
         }
+
     }
 }

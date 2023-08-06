@@ -3,6 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace DiscordBot.Services
 {
@@ -15,7 +17,7 @@ namespace DiscordBot.Services
         /// <summary>
         ///     Url to the Bitcoin Price Api
         /// </summary>
-        private string? _byBitApiUrlBtc;
+        private string? _byBitApiUrl;
 
         public CryptoService(IHttpService httpService, IConfiguration configuration)
         {
@@ -24,37 +26,45 @@ namespace DiscordBot.Services
         }
 
         /// <summary>
-        ///     Gets the current Bitcion price from bybit public api
+        ///     Gets the current Price of a given Cryptocurrency. Default = BTC
         /// </summary>
-        /// <returns>The current price from bitcoin as BTCUSD string</returns>
-        public async Task<string> GetCurrentBitcoinPriceAsync()
+        /// <returns>The current price of given Cryptocurrency as string</returns>
+        public async Task<Tuple<bool, string>> GetCryptoPriceAsync(string symbol = "BTC")
         {
-            _byBitApiUrlBtc = _configuration["ByBit:ApiUrlBtc"] ?? string.Empty;
-
-            if (string.IsNullOrEmpty(_byBitApiUrlBtc))
+            _byBitApiUrl = _configuration["ByBit:ApiUrl"] ?? string.Empty;
+            symbol = symbol.ToUpper();
+            if (string.IsNullOrEmpty(_byBitApiUrl))
             {
-                const string? errorMessage =
+                const string errorMessage =
                     "No ByBit Api Url was provided, please contact the Developer to add a valid Api Url!";
-                Program.Log($"{nameof(GetCurrentBitcoinPriceAsync)}: " + errorMessage, LogLevel.Error);
-                return errorMessage;
+                Program.Log($"{nameof(GetCryptoPriceAsync)}: " + errorMessage, LogLevel.Error);
+                return new Tuple<bool, string>(false,errorMessage);
             }
 
-            HttpResponse response = await _httpService.GetResponseFromUrl(_byBitApiUrlBtc);
+            string requestUrl = _byBitApiUrl + symbol + "USDT";
+            Console.WriteLine(requestUrl);
+            HttpResponse response = await _httpService.GetResponseFromUrl(requestUrl);
 
             if (!response.IsSuccessStatusCode)
             {
-                return response.Content ?? "";
+                return new Tuple<bool, string>(false, response.Content ?? "");
             }
 
             try
             {
                 JObject json = JObject.Parse(response.Content ?? "{}");
-                return json["result"]?[0]?["last_price"]?.Value<string>() ?? "Could not fetch current Bitcoin price...";
-            }
-            catch (JsonReaderException ex)
+                string respString =  json["result"]?[0]?["last_price"]?.Value<string>() ?? $"Could not fetch price of {symbol}...";
+
+                bool success = !string.IsNullOrEmpty(respString) && respString != "Could not fetch current Bitcoin price...";
+
+                Program.Log(respString + " - " + success);
+                return new Tuple<bool,string>(success, respString);
+
+
+            } catch (JsonReaderException ex)
             {
-                Program.Log($"{nameof(GetCurrentBitcoinPriceAsync)}: " + ex.Message, LogLevel.Error);
-                return "Could not fetch current Bitcoin price...";
+                Program.Log($"{nameof(GetCryptoPriceAsync)}: " + ex.Message, LogLevel.Error);               
+                return new Tuple<bool, string>(false, $"Could not fetch price of {symbol}...");
             }
         }
     }

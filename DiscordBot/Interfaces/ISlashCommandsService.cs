@@ -9,5 +9,6 @@ namespace DiscordBot.Interfaces
         Task ImageSlashCommandAsync(IInteractionContextWrapper context, string text);
         Task Watch2GetherSlashCommandAsync(IInteractionContextWrapper context, string url);
         Task WeatherSlashCommandAsync(IInteractionContextWrapper context, string city);
+        Task CryptoSlashCommandAsync(IInteractionContextWrapper context, string symbol);
     }
 }

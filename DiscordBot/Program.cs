@@ -92,6 +92,7 @@ namespace DiscordBot
                 Environment.Exit(404);
                 return;
             }
+            Log("Got Token: " + _discordToken);
 
             // Create a new Discord client with specified gateway intents
             DiscordConfiguration config = new()
@@ -138,11 +139,15 @@ namespace DiscordBot
                 switch (statusIndex)
                 {
                     case 0:
-                        string? currentBitcoinPrice = await CryptoService.GetCurrentBitcoinPriceAsync();
+                        (bool success,string? currentBitcoinPrice) = await CryptoService.GetCryptoPriceAsync("BTC");
                         DiscordActivity activity1 =
                             new(
                                 $"BTC: ${(currentBitcoinPrice.Length > 110 ? currentBitcoinPrice[..110] : currentBitcoinPrice)}",
                                 ActivityType.Watching);
+                        if (!success) {
+                            activity1.Name = "Failed to fetch BTC Price...";
+                        }
+                        
                         await Client.UpdateStatusAsync(activity1);
                         break;
                     case 1:

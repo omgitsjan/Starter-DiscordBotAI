@@ -2,6 +2,6 @@
 {
     public interface ICryptoService
     {
-        public Task<string> GetCurrentBitcoinPriceAsync();
+        public Task<Tuple<bool, string>> GetCryptoPriceAsync(string symbol);
     }
 }
