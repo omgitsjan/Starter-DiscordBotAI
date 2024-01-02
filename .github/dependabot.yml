@@ -12,7 +12,7 @@ updates:
       day: "sunday"
       time: "10:00"
       timezone: "Europe/Berlin"
-    target-branch: "develop"
+    target-branch: "master"
     assignees:
       - "omgitsjan"
     reviewers:
