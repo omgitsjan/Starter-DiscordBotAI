@@ -19,14 +19,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DSharpPlus" Version="4.4.2" />
+		<PackageReference Include="DSharpPlus" Version="4.4.6" />
 		<PackageReference Include="DSharpPlus.Interactivity" Version="4.4.2" />
-		<PackageReference Include="DSharpPlus.SlashCommands" Version="4.4.2" />
+		<PackageReference Include="DSharpPlus.SlashCommands" Version="4.4.6" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
-		<PackageReference Include="NLog.Extensions.Logging" Version="5.3.4" />
+		<PackageReference Include="NLog.Extensions.Logging" Version="5.3.8" />
 		<PackageReference Include="RestSharp" Version="110.2.0" />
 	</ItemGroup>
 
