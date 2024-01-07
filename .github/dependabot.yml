@@ -8,5 +8,22 @@ updates:
   - package-ecosystem: "nuget" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
+      day: "sunday"
+      time: "10:00"
+      timezone: "Europe/Berlin"
+    target-branch: "master"
+    assignees:
+      - "omgitsjan"
+    reviewers:
+      - "omgitsjan"
+    groups:
+      patch:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
