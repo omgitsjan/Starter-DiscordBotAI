@@ -38,7 +38,7 @@ namespace DiscordBot.Services
                 const string errorMessage =
                     "No ByBit Api Url was provided, please contact the Developer to add a valid Api Url!";
                 Program.Log($"{nameof(GetCryptoPriceAsync)}: " + errorMessage, LogLevel.Error);
-                return new Tuple<bool, string>(false,errorMessage);
+                return new Tuple<bool, string>(false, errorMessage);
             }
 
             string requestUrl = _byBitApiUrl + symbol + physicalCurrency;
@@ -53,17 +53,20 @@ namespace DiscordBot.Services
             try
             {
                 JObject json = JObject.Parse(response.Content ?? "{}");
-                string respString =  json["result"]?[0]?["last_price"]?.Value<string>() ?? $"Could not fetch price of {symbol}...";
+                string? respString = json["result"]?[0]?["last_price"]?.Value<string>();
+                bool success = respString != null;
 
-                bool success = !string.IsNullOrEmpty(respString) && respString != "Could not fetch current Bitcoin price...";
+                if (!success)
+                {
+                    respString = $"Could not fetch price of {symbol}...";
+                }
 
-                Program.Log(respString + " - " + success);
-                return new Tuple<bool,string>(success, respString);
-
-
-            } catch (JsonReaderException ex)
+                Program.Log($"{nameof(GetCryptoPriceAsync)}: {respString} - {success}", LogLevel.Information);
+                return new Tuple<bool, string>(success, respString);
+            }
+            catch (JsonReaderException ex)
             {
-                Program.Log($"{nameof(GetCryptoPriceAsync)}: " + ex.Message, LogLevel.Error);               
+                Program.Log($"{nameof(GetCryptoPriceAsync)}: " + ex.Message, LogLevel.Error);
                 return new Tuple<bool, string>(false, $"Could not fetch price of {symbol}...");
             }
         }

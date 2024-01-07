@@ -16,6 +16,7 @@ public class SlashCommandsServiceTests
     private Mock<IOpenWeatherMapService> _openWeatherMapServiceMock;
     private SlashCommandsService _slashCommandsService;
     private Mock<IWatch2GetherService> _watch2GetherServiceMock;
+    private Mock<ICryptoService> _cryptoServiceMock;
 
     [SetUp]
     public void Setup()
@@ -24,9 +25,10 @@ public class SlashCommandsServiceTests
         _watch2GetherServiceMock = new Mock<IWatch2GetherService>();
         _openWeatherMapServiceMock = new Mock<IOpenWeatherMapService>();
         _openAiServiceMock = new Mock<IOpenAiService>();
+        _cryptoServiceMock = new Mock<ICryptoService>();
 
         _slashCommandsService = new SlashCommandsService(_watch2GetherServiceMock.Object,
-            _openWeatherMapServiceMock.Object, _openAiServiceMock.Object);
+            _openWeatherMapServiceMock.Object, _openAiServiceMock.Object, _cryptoServiceMock.Object);
     }
 
     [Test]
