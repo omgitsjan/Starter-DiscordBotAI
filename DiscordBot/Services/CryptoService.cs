@@ -6,30 +6,20 @@ using Newtonsoft.Json.Linq;
 
 namespace DiscordBot.Services
 {
-    public class CryptoService : ICryptoService
+    public class CryptoService(IHttpService httpService, IConfiguration configuration) : ICryptoService
     {
-        private readonly IConfiguration _configuration;
-
-        private readonly IHttpService _httpService;
-
         /// <summary>
         ///     Url to the Bitcoin Price Api
         /// </summary>
         private string? _byBitApiUrlBtc;
 
-        public CryptoService(IHttpService httpService, IConfiguration configuration)
-        {
-            _httpService = httpService;
-            _configuration = configuration;
-        }
-
         /// <summary>
-        ///     Gets the current Bitcion price from bybit public api
+        ///     Gets the current Bitcoin price from bybit public api
         /// </summary>
-        /// <returns>The current price from bitcoin as BTCUSD string</returns>
+        /// <returns>The current price from bitcoin as BTC-USD string</returns>
         public async Task<string> GetCurrentBitcoinPriceAsync()
         {
-            _byBitApiUrlBtc = _configuration["ByBit:ApiUrlBtc"] ?? string.Empty;
+            _byBitApiUrlBtc = configuration["ByBit:ApiUrlBtc"] ?? string.Empty;
 
             if (string.IsNullOrEmpty(_byBitApiUrlBtc))
             {
@@ -39,7 +29,7 @@ namespace DiscordBot.Services
                 return errorMessage;
             }
 
-            HttpResponse response = await _httpService.GetResponseFromUrl(_byBitApiUrlBtc);
+            HttpResponse response = await httpService.GetResponseFromUrl(_byBitApiUrlBtc);
 
             if (!response.IsSuccessStatusCode)
             {

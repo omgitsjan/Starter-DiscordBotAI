@@ -4,21 +4,14 @@ using DSharpPlus.SlashCommands;
 
 namespace DiscordBot
 {
-    public class SlashCommands : ApplicationCommandModule
+    public class SlashCommands(ISlashCommandsService slashCommandsService) : ApplicationCommandModule
     {
-        private readonly ISlashCommandsService _slashCommandsService;
-
-        public SlashCommands(ISlashCommandsService slashCommandsService)
-        {
-            _slashCommandsService = slashCommandsService;
-        }
-
         [SlashCommand("ping",
             "This is a basic ping command to check if the Bot is online and what the current Latency is")]
         public async Task PingSlashCommand(InteractionContext ctx)
         {
-            InteractionContextWrapper context = new InteractionContextWrapper(ctx);
-            await _slashCommandsService.PingSlashCommandAsync(context);
+            InteractionContextWrapper context = new(ctx);
+            await slashCommandsService.PingSlashCommandAsync(context);
         }
 
         [SlashCommand("ChatGPT",
@@ -27,8 +20,8 @@ namespace DiscordBot
             [Option("prompt", "Write an input that the ChatGPT AI should respond to")]
             string text)
         {
-            InteractionContextWrapper context = new InteractionContextWrapper(ctx);
-            await _slashCommandsService.ChatSlashCommandAsync(context, text);
+            InteractionContextWrapper context = new(ctx);
+            await slashCommandsService.ChatSlashCommandAsync(context, text);
         }
 
         [SlashCommand("DALL-E",
@@ -37,8 +30,8 @@ namespace DiscordBot
             [Option("prompt", "Write a Text on how the generated Image should look like")]
             string text)
         {
-            InteractionContextWrapper context = new InteractionContextWrapper(ctx);
-            await _slashCommandsService.ImageSlashCommandAsync(context, text);
+            InteractionContextWrapper context = new(ctx);
+            await slashCommandsService.ImageSlashCommandAsync(context, text);
         }
 
         [SlashCommand("Watch2Gether",
@@ -47,8 +40,8 @@ namespace DiscordBot
             [Option("Video-URL", "Insert a Video-URL that should auto start after creating a Watch2Gether Room")]
             string url = "")
         {
-            InteractionContextWrapper context = new InteractionContextWrapper(ctx);
-            await _slashCommandsService.Watch2GetherSlashCommandAsync(context, url);
+            InteractionContextWrapper context = new(ctx);
+            await slashCommandsService.Watch2GetherSlashCommandAsync(context, url);
         }
 
         [SlashCommand("Weather", "Get the current weather for the specified city")]
@@ -56,8 +49,8 @@ namespace DiscordBot
             [Option("city", "The city you want to get the weather for")]
             string city)
         {
-            InteractionContextWrapper context = new InteractionContextWrapper(ctx);
-            await _slashCommandsService.WeatherSlashCommandAsync(context, city);
+            InteractionContextWrapper context = new(ctx);
+            await slashCommandsService.WeatherSlashCommandAsync(context, city);
         }
     }
 }

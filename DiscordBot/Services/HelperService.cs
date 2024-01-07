@@ -1,57 +1,58 @@
 ﻿using DiscordBot.Interfaces;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace DiscordBot.Services
 {
     public class HelperService : IHelperService
     {
-        private readonly IConfiguration _configuration;
+        private readonly List<string> _developerExcuses = [];
+        private readonly ILogger<HelperService> _logger;
 
-        private readonly IHttpService _httpService;
-        private string? _developerExcuseApiUrl;
-
-        public HelperService(IHttpService httpService, IConfiguration configuration)
+        public HelperService(ILogger<HelperService> logger)
         {
-            _httpService = httpService;
-            _configuration = configuration;
+            _logger = logger;
+            LoadDeveloperExcuses(null);
         }
 
-        /// <summary>
-        ///     Gets a random dev excuse from the open dev-excuses-api (herokuapp.com)
-        /// </summary>
-        /// <returns></returns>
-        public async Task<string> GetRandomDeveloperExcuseAsync()
+        public HelperService(ILogger<HelperService> logger, string? excusesFilePath)
         {
-            _developerExcuseApiUrl = _configuration["DeveloperExcuse:ApiUrl"] ?? string.Empty;
+            _logger = logger;
+            LoadDeveloperExcuses(excusesFilePath);
+        }
 
-            if (string.IsNullOrEmpty(_developerExcuseApiUrl))
+        private void LoadDeveloperExcuses(string? excusesFilePath)
+        {
+            string filePath = excusesFilePath ?? Path.Combine(Directory.GetCurrentDirectory(), "Data", "excuses.json");
+
+            if (!File.Exists(filePath))
             {
-                const string? errorMessage =
-                    "No DeveloperExcuse Api Url was provided, please contact the Developer to add a valid Api Url!";
-                Program.Log($"{nameof(GetRandomDeveloperExcuseAsync)}: " + errorMessage, LogLevel.Error);
-                return errorMessage;
-            }
-
-            HttpResponse response = await _httpService.GetResponseFromUrl(_developerExcuseApiUrl);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return response.Content ?? "";
+                _logger.LogError("Developer excuses file not found at: {FilePath}", filePath);
+                return;
             }
 
             try
             {
-                JObject json = JObject.Parse(response.Content ?? "{}");
-                return json["text"]?.Value<string>() ?? "Could not fetch current Developer excuse...";
+                string jsonContent = File.ReadAllText(filePath);
+                JObject json = JObject.Parse(jsonContent);
+                _developerExcuses.AddRange(json["en"]?.ToObject<List<string>>() ?? throw new Exception());
             }
-            catch (JsonReaderException ex)
+            catch (Exception ex)
             {
-                Program.Log($"{nameof(GetRandomDeveloperExcuseAsync)}: " + ex.Message, LogLevel.Error);
-                return "Could not fetch current Developer excuse...";
+                _logger.LogError(ex, "Error loading developer excuses from file: {FilePath}", filePath);
             }
+        }
+
+        public Task<string> GetRandomDeveloperExcuseAsync()
+        {
+            if (_developerExcuses.Count == 0)
+            {
+                return Task.FromResult("Could not fetch a Developer excuse. Please check the configuration.");
+            }
+
+            Random random = new();
+            int index = random.Next(_developerExcuses.Count);
+            return Task.FromResult(_developerExcuses[index]);
         }
     }
 }
