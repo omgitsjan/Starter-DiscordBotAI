@@ -8,23 +8,17 @@ using DSharpPlus.Entities;
 
 namespace DiscordBot.Services
 {
-    public class SlashCommandsService : ISlashCommandsService
+    public class SlashCommandsService(
+        IWatch2GetherService watch2GetherService,
+        IOpenWeatherMapService openWeatherMapService,
+        IOpenAiService openAiService,
+        ICryptoService cryptoService)
+        : ISlashCommandsService
     {
-        private readonly IOpenAiService _openAiService;
-        private readonly IOpenWeatherMapService _openWeatherMapService;
-        private readonly IWatch2GetherService _watch2GetherService;
-        private readonly ICryptoService _cryptoService;
-
-        public SlashCommandsService(IWatch2GetherService watch2GetherService,
-            IOpenWeatherMapService openWeatherMapService,
-            IOpenAiService openAiService,
-            ICryptoService cryptoService)
-        {
-            _watch2GetherService = watch2GetherService;
-            _openWeatherMapService = openWeatherMapService;
-            _openAiService = openAiService;
-            _cryptoService = cryptoService;
-        }
+        private readonly IOpenAiService _openAiService = openAiService;
+        private readonly IOpenWeatherMapService _openWeatherMapService = openWeatherMapService;
+        private readonly IWatch2GetherService _watch2GetherService = watch2GetherService;
+        private readonly ICryptoService _cryptoService = cryptoService;
 
         public async Task PingSlashCommandAsync(IInteractionContextWrapper ctx)
         {
@@ -77,7 +71,7 @@ namespace DiscordBot.Services
                 new DiscordInteractionResponseBuilder().WithContent("Sending Request to ChatGPT API..."));
 
             // Execute and waiting for the response from our Method
-            (bool success, string? message) = await openAiService.ChatGptAsync(text);
+            (bool success, string? message) = await _openAiService.ChatGptAsync(text);
 
             // Creating embed Message via DiscordEmbedBuilder
             DiscordEmbedBuilder embedMessage = new()
@@ -126,7 +120,7 @@ namespace DiscordBot.Services
                 new DiscordInteractionResponseBuilder().WithContent("Sending Request to DALL-E API..."));
 
             // Execute the DALL-E API request and wait for a response
-            (bool sucess, string message) = await openAiService.DallEAsync(text);
+            (bool sucess, string message) = await _openAiService.DallEAsync(text);
 
             // Extract the image URL from the response message using a regular expression
             string url = Regex.Match(message, @"http(s)?://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?").ToString();
@@ -179,7 +173,7 @@ namespace DiscordBot.Services
                     "Sending create Room request to Watch2Gether API..."));
 
             // Call CreateRoom in the Watch2GetherService to send a create room request to the Watch2Gether Api
-            (bool success, string? message) = await watch2GetherService.CreateRoom(url);
+            (bool success, string? message) = await _watch2GetherService.CreateRoom(url);
 
             // Creates the Message that should display
             DiscordEmbedBuilder embedMessage = new()
@@ -230,7 +224,7 @@ namespace DiscordBot.Services
                 new DiscordInteractionResponseBuilder().WithContent("Fetching weather data..."));
 
             // Call GetWeatherAsync to fetch the weather data for the specified city
-            (bool success, string message, WeatherData? weather) = await openWeatherMapService.GetWeatherAsync(city);
+            (bool success, string message, WeatherData? weather) = await _openWeatherMapService.GetWeatherAsync(city);
 
             if (success)
             {

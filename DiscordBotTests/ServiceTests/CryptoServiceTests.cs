@@ -9,8 +9,8 @@ namespace DiscordBotTests.ServiceTests;
 [TestFixture]
 public class CryptoServiceTests
 {
-    private Mock<IHttpService> _mockHttpService;
-    private CryptoService _cryptoService;
+    private Mock<IHttpService> _mockHttpService = null!;
+    private CryptoService _cryptoService = null!;
 
     [SetUp]
     public void Setup()

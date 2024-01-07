@@ -62,7 +62,7 @@ namespace DiscordBot.Services
                 }
 
                 Program.Log($"{nameof(GetCryptoPriceAsync)}: {respString} - {success}", LogLevel.Information);
-                return new Tuple<bool, string>(success, respString);
+                return new Tuple<bool, string>(success, respString ?? throw new Exception());
             }
             catch (JsonReaderException ex)
             {
