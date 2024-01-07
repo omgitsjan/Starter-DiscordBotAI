@@ -26,8 +26,8 @@ public class HelperServiceTests
         _helperService = new HelperService(_mockHttpService.Object, configuration);
     }
 
-    private Mock<IHttpService> _mockHttpService;
-    private HelperService _helperService;
+    private Mock<IHttpService> _mockHttpService = null!;
+    private HelperService _helperService = null!;
 
     [Test]
     public async Task GetRandomDeveloperExcuseAsync_ReturnsRandomDeveloperExcuse()

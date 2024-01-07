@@ -1,6 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+		<PackageId>DiscordBotAI</PackageId>
+		<Description>
+			Starter Discord Bot using DSharp and having basic features like an Open AI connection
+		</Description>
+		<Authors>omgitsjan</Authors>
+		<RepositoryUrl>https://github.com/omgitsjan/DiscordBotAI</RepositoryUrl>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net7.0</TargetFramework>
 		<RootNamespace>DiscordBot</RootNamespace>

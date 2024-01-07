@@ -64,9 +64,12 @@ namespace DiscordBot
             "Gets the price for a given Cryptocurrency")]
         public async Task CryptoSlashCommand(InteractionContext ctx,
             [Option("Symbol", "The Cryptocurrency you want to get the price for")]
-            string symbol = "") {
+            string symbol = "BTC",
+            [Option("PhysicalCurrency", "The physical currency to compare against, e.g., USDT")]
+            string physicalCurrency = "USDT")
+        {
             InteractionContextWrapper context = new InteractionContextWrapper(ctx);
-            await _slashCommandsService.CryptoSlashCommandAsync(context, symbol);
+            await _slashCommandsService.CryptoSlashCommandAsync(context, symbol, physicalCurrency);
         }
     }
 }

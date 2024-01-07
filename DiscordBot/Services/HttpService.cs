@@ -15,9 +15,9 @@ namespace DiscordBot.Services
         }
 
         /// <summary>
-        ///     Gets the response from an URL and handles errors
+        ///     Gets the response from a URL and handles errors
         /// </summary>
-        /// <returns>The current price from bitcoin as BTCUSD string</returns>
+        /// <returns>The current price from bitcoin as BTC-USDT string</returns>
         public async Task<HttpResponse> GetResponseFromUrl(string resource, Method method = Method.Get,
             string? errorMessage = null, List<KeyValuePair<string, string>>? headers = null, object? jsonBody = null)
         {

@@ -269,7 +269,7 @@ namespace DiscordBot.Services
             }
         }       
 
-        public async Task CryptoSlashCommandAsync(IInteractionContextWrapper ctx, string symbol = "BTC") {
+        public async Task CryptoSlashCommandAsync(IInteractionContextWrapper ctx, string symbol = "BTC", string physicalCurrency = "USDT") {
             symbol = symbol.ToUpper();
 
             // Send a "thinking" response to let the user know that the bot is working on their request
@@ -278,14 +278,14 @@ namespace DiscordBot.Services
                     "Requesting " + symbol + " from ByBit API..."));
 
             // Call GetCryptoPriceAsync to get the current Price
-            (bool success, string? message) = await _cryptoService.GetCryptoPriceAsync(symbol);
-            Program.Log("MEsae: " + message);
+            (bool success, string? message) = await _cryptoService.GetCryptoPriceAsync(symbol, physicalCurrency);
+            Program.Log("Message: " + message);
 
             if (success) {
                 DiscordEmbedBuilder embedMessage = new DiscordEmbedBuilder
                 {
-                    Title = $"{symbol}USDT - ${message}",
-                    Description = $"Price of {symbol}USDT is ${message}",
+                    Title = $"{symbol} - {physicalCurrency} | ${message}",
+                    Description = $"Price of {symbol} - {physicalCurrency} is ${message}",
                     Author = new DiscordEmbedBuilder.EmbedAuthor
                     {
                         Name = ctx.User.Username,

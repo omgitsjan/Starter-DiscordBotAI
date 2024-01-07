@@ -26,10 +26,10 @@ namespace DiscordBot.Services
         }
 
         /// <summary>
-        ///     Gets the current Price of a given Cryptocurrency. Default = BTC
+        ///     Gets the current Price of a given Cryptocurrency. Default = BTC & USDT
         /// </summary>
         /// <returns>The current price of given Cryptocurrency as string</returns>
-        public async Task<Tuple<bool, string>> GetCryptoPriceAsync(string symbol = "BTC")
+        public async Task<Tuple<bool, string>> GetCryptoPriceAsync(string symbol = "BTC", string physicalCurrency = "USDT")
         {
             _byBitApiUrl = _configuration["ByBit:ApiUrl"] ?? string.Empty;
             symbol = symbol.ToUpper();
@@ -41,7 +41,7 @@ namespace DiscordBot.Services
                 return new Tuple<bool, string>(false,errorMessage);
             }
 
-            string requestUrl = _byBitApiUrl + symbol + "USDT";
+            string requestUrl = _byBitApiUrl + symbol + physicalCurrency;
             Console.WriteLine(requestUrl);
             HttpResponse response = await _httpService.GetResponseFromUrl(requestUrl);
 

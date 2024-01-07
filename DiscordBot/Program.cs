@@ -139,15 +139,16 @@ namespace DiscordBot
                 switch (statusIndex)
                 {
                     case 0:
-                        (bool success,string? currentBitcoinPrice) = await CryptoService.GetCryptoPriceAsync("BTC");
+                        (bool success, string? currentBitcoinPrice) = await CryptoService.GetCryptoPriceAsync("BTC", "USDT");
                         DiscordActivity activity1 =
                             new(
                                 $"BTC: ${(currentBitcoinPrice.Length > 110 ? currentBitcoinPrice[..110] : currentBitcoinPrice)}",
                                 ActivityType.Watching);
-                        if (!success) {
+                        if (!success)
+                        {
                             activity1.Name = "Failed to fetch BTC Price...";
                         }
-                        
+
                         await Client.UpdateStatusAsync(activity1);
                         break;
                     case 1:
@@ -243,7 +244,7 @@ namespace DiscordBot
         private static bool IsDebug()
         {
 #if DEBUG
-        return true;
+            return true;
 #else
             return false;
 #endif
