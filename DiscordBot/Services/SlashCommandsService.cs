@@ -29,7 +29,7 @@ namespace DiscordBot.Services
         public async Task PingSlashCommandAsync(IInteractionContextWrapper ctx)
         {
             // Creating the ping to measure response time
-            Ping pinger = new Ping();
+            Ping pinger = new();
 
             // Creating a Message in the channel
             await ctx.Channel.SendMessageAsync("Ping...");
@@ -42,7 +42,7 @@ namespace DiscordBot.Services
             PingReply reply = pinger.Send("google.com");
 
             // Creates the Message that should display
-            DiscordEmbedBuilder embedMessage = new DiscordEmbedBuilder
+            DiscordEmbedBuilder embedMessage = new()
             {
                 Title = "Pong!",
                 Description = $"Latency is: {reply.RoundtripTime} ms",
@@ -77,10 +77,10 @@ namespace DiscordBot.Services
                 new DiscordInteractionResponseBuilder().WithContent("Sending Request to ChatGPT API..."));
 
             // Execute and waiting for the response from our Method
-            (bool success, string? message) = await _openAiService.ChatGptAsync(text);
+            (bool success, string? message) = await openAiService.ChatGptAsync(text);
 
             // Creating embed Message via DiscordEmbedBuilder
-            DiscordEmbedBuilder embedMessage = new DiscordEmbedBuilder
+            DiscordEmbedBuilder embedMessage = new()
             {
                 Title = "ChatGPT",
                 Description = message,
@@ -126,13 +126,13 @@ namespace DiscordBot.Services
                 new DiscordInteractionResponseBuilder().WithContent("Sending Request to DALL-E API..."));
 
             // Execute the DALL-E API request and wait for a response
-            (bool sucess, string message) = await _openAiService.DallEAsync(text);
+            (bool sucess, string message) = await openAiService.DallEAsync(text);
 
             // Extract the image URL from the response message using a regular expression
             string url = Regex.Match(message, @"http(s)?://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?").ToString();
 
             // Create an embed message to display the generated image
-            DiscordEmbedBuilder embedMessage = new DiscordEmbedBuilder
+            DiscordEmbedBuilder embedMessage = new()
             {
                 Title = "DALL-E",
                 Description = message,
@@ -179,10 +179,10 @@ namespace DiscordBot.Services
                     "Sending create Room request to Watch2Gether API..."));
 
             // Call CreateRoom in the Watch2GetherService to send a create room request to the Watch2Gether Api
-            (bool sucess, string? message) = await _watch2GetherService.CreateRoom(url);
+            (bool success, string? message) = await watch2GetherService.CreateRoom(url);
 
             // Creates the Message that should display
-            DiscordEmbedBuilder embedMessage = new DiscordEmbedBuilder
+            DiscordEmbedBuilder embedMessage = new()
             {
                 Title = "Watch2Gether Room!",
                 Description = $"This Room was created for you and is available under the following link: {message}",
@@ -200,7 +200,7 @@ namespace DiscordBot.Services
             };
 
             // If the API request was not successful, log the error message
-            if (!sucess)
+            if (!success)
             {
                 Program.Log(message);
                 embedMessage.Description = message;
@@ -216,7 +216,7 @@ namespace DiscordBot.Services
             await ctx.DeleteResponseAsync();
 
             // Logging the success of the command with message and user details
-            if (sucess)
+            if (success)
             {
                 Program.Log(
                     $"Command '{nameof(Watch2GetherSlashCommandAsync)}' executed successfully by user {ctx.User.Username} ({ctx.User.Id}).");
@@ -230,11 +230,11 @@ namespace DiscordBot.Services
                 new DiscordInteractionResponseBuilder().WithContent("Fetching weather data..."));
 
             // Call GetWeatherAsync to fetch the weather data for the specified city
-            (bool success, string message, WeatherData? weather) = await _openWeatherMapService.GetWeatherAsync(city);
+            (bool success, string message, WeatherData? weather) = await openWeatherMapService.GetWeatherAsync(city);
 
             if (success)
             {
-                DiscordEmbedBuilder embedMessage = new DiscordEmbedBuilder
+                DiscordEmbedBuilder embedMessage = new()
                 {
                     Title = $"Weather in {city} - {weather?.Temperature:F2}°C",
                     Description = message,

@@ -132,7 +132,7 @@ namespace DiscordBot
 
             // Set up the timer to change the status every 30 seconds
             int statusIndex = 0; // This variable helps us cycle through the different statuses
-            Timer timer = new Timer(15000); // Set the timer to execute every 30 seconds
+            Timer timer = new(15000); // Set the timer to execute every 30 seconds
 
             timer.Elapsed += async (_, _) =>
             {
@@ -180,7 +180,7 @@ namespace DiscordBot
                         break;
                     case 6:
                         await Client.UpdateStatusAsync(new DiscordActivity(
-                            "omgitsjan/DiscordBotAI | JPProfessionals.de",
+                            "omgitsjan/DiscordBotAI | janpetry.de",
                             ActivityType.Watching));
                         break;
                 }
@@ -206,7 +206,7 @@ namespace DiscordBot
         {
             if (Logger != null)
             {
-                Logger.Log(logLevel, msg);
+                Logger.Log(logLevel, "{Message}", msg);
             }
             else
             {

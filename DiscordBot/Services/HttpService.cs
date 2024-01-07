@@ -5,15 +5,8 @@ using RestSharp;
 
 namespace DiscordBot.Services
 {
-    public class HttpService : IHttpService
+    public class HttpService(IRestClient httpClient) : IHttpService
     {
-        private readonly IRestClient _httpClient;
-
-        public HttpService(IRestClient httpClient)
-        {
-            _httpClient = httpClient;
-        }
-
         /// <summary>
         ///     Gets the response from a URL and handles errors
         /// </summary>
@@ -21,9 +14,9 @@ namespace DiscordBot.Services
         public async Task<HttpResponse> GetResponseFromUrl(string resource, Method method = Method.Get,
             string? errorMessage = null, List<KeyValuePair<string, string>>? headers = null, object? jsonBody = null)
         {
-            RestRequest request = new RestRequest(resource, method);
+            RestRequest request = new(resource, method);
 
-            if (headers != null && headers.Any())
+            if (headers != null && headers.Count != 0)
             {
                 headers.ForEach(header => request.AddHeader(header.Key, header.Value));
             }
@@ -33,12 +26,12 @@ namespace DiscordBot.Services
                 request.AddJsonBody(jsonBody);
             }
 
-            RestResponse response = new RestResponse();
+            RestResponse response = new();
 
             // Send the HTTP request asynchronously and await the response.
             try
             {
-                response = await _httpClient.ExecuteAsync(request);
+                response = await httpClient.ExecuteAsync(request);
             }
             catch (Exception e)
             {
@@ -62,15 +55,9 @@ namespace DiscordBot.Services
         }
     }
 
-    public class HttpResponse
+    public class HttpResponse(bool isSuccessStatusCode, string? content)
     {
-        public HttpResponse(bool isSuccessStatusCode, string? content)
-        {
-            IsSuccessStatusCode = isSuccessStatusCode;
-            Content = content;
-        }
-
-        public bool IsSuccessStatusCode { get; set; }
-        public string? Content { get; set; }
+        public bool IsSuccessStatusCode { get; set; } = isSuccessStatusCode;
+        public string? Content { get; set; } = content;
     }
 }

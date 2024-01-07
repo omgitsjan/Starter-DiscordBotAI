@@ -7,8 +7,7 @@ using Moq;
 
 namespace DiscordBotTests.ServiceTests;
 
-[Ignore(
-    "This Test is not yet implemented, currently i don't exactly know how to proper mock the DiscordUser & DiscordChannel")]
+[Ignore("This test is not yet implemented. Currently, I don't know exactly how to properly mock the DiscordUser & DiscordChannel.")]
 public class SlashCommandsServiceTests
 {
     private Mock<IInteractionContextWrapper> _ctxMock;
