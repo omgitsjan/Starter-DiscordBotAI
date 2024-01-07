@@ -6,12 +6,8 @@ using RestSharp;
 
 namespace DiscordBot.Services
 {
-    public class Watch2GetherService : IWatch2GetherService
+    public class Watch2GetherService(IHttpService httpService, IConfiguration configuration) : IWatch2GetherService
     {
-        private readonly IConfiguration _configuration;
-
-        private readonly IHttpService _httpService;
-
         /// <summary>
         ///     Api Key to access Watch2Gether Api
         /// </summary>
@@ -27,12 +23,6 @@ namespace DiscordBot.Services
         /// </summary>
         private string? _w2GShowRoomUrl;
 
-        public Watch2GetherService(IHttpService httpService, IConfiguration configuration)
-        {
-            _httpService = httpService;
-            _configuration = configuration;
-        }
-
         /// <summary>
         ///     Creates a Watch2Gether room for sharing a video.
         /// </summary>
@@ -44,9 +34,9 @@ namespace DiscordBot.Services
         public async Task<Tuple<bool, string?>> CreateRoom(string videoUrl)
         {
             // Retrieve the urls and the apikey from the configuration
-            _w2GApiKey = _configuration["Watch2Gether:ApiKey"] ?? string.Empty;
-            _w2GCreateRoomUrl = _configuration["Watch2Gether:CreateRoomUrl"] ?? string.Empty;
-            _w2GShowRoomUrl = _configuration["Watch2Gether:ShowRoomUrl"] ?? string.Empty;
+            _w2GApiKey = configuration["Watch2Gether:ApiKey"] ?? string.Empty;
+            _w2GCreateRoomUrl = configuration["Watch2Gether:CreateRoomUrl"] ?? string.Empty;
+            _w2GShowRoomUrl = configuration["Watch2Gether:ShowRoomUrl"] ?? string.Empty;
 
             string? message = "";
 
@@ -58,11 +48,11 @@ namespace DiscordBot.Services
                 return new Tuple<bool, string?>(false, message);
             }
 
-            List<KeyValuePair<string, string>> headers = new()
-            {
+            List<KeyValuePair<string, string>> headers =
+            [
                 new KeyValuePair<string, string>("Content-Type", "application/json"),
                 new KeyValuePair<string, string>("Accept", "application/json")
-            };
+            ];
 
             var data = new
             {
@@ -70,13 +60,13 @@ namespace DiscordBot.Services
                 share = videoUrl
             };
 
-            HttpResponse response = await _httpService.GetResponseFromUrl(_w2GCreateRoomUrl, Method.Post,
+            HttpResponse response = await httpService.GetResponseFromUrl(_w2GCreateRoomUrl, Method.Post,
                 $"{nameof(CreateRoom)}: No response from Watch2Gether", headers, data);
 
             message = response.Content;
 
             // If the response content is null, set the error message and return the result Tuple.
-            if (response.IsSuccessStatusCode && response.Content != null)
+            if (response is { IsSuccessStatusCode: true, Content: not null })
             {
                 try
                 {

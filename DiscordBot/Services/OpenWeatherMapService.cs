@@ -7,12 +7,8 @@ using RestSharp;
 
 namespace DiscordBot.Services
 {
-    public class OpenWeatherMapService : IOpenWeatherMapService
+    public class OpenWeatherMapService(IHttpService httpService, IConfiguration configuration) : IOpenWeatherMapService
     {
-        private readonly IConfiguration _configuration;
-
-        private readonly IHttpService _httpService;
-
         /// <summary>
         ///     Api Key to access OpenWeatherMap Api
         /// </summary>
@@ -23,17 +19,11 @@ namespace DiscordBot.Services
         /// </summary>
         private string? _openWeatherMapUrl;
 
-        public OpenWeatherMapService(IHttpService httpService, IConfiguration configuration)
-        {
-            _httpService = httpService;
-            _configuration = configuration;
-        }
-
         public async Task<(bool Success, string Message, WeatherData? weatherData)> GetWeatherAsync(string city)
         {
             // Retrieve the url and the apikey from the configuration
-            _openWeatherMapUrl = _configuration["OpenWeatherMap:ApiUrl"] ?? string.Empty;
-            _openWeatherMapApiKey = _configuration["OpenWeatherMap:ApiKey"] ?? string.Empty;
+            _openWeatherMapUrl = configuration["OpenWeatherMap:ApiUrl"] ?? string.Empty;
+            _openWeatherMapApiKey = configuration["OpenWeatherMap:ApiKey"] ?? string.Empty;
 
             if (string.IsNullOrEmpty(_openWeatherMapApiKey) || string.IsNullOrEmpty(_openWeatherMapUrl))
             {
@@ -44,7 +34,7 @@ namespace DiscordBot.Services
                     null);
             }
 
-            HttpResponse response = await _httpService.GetResponseFromUrl(
+            HttpResponse response = await httpService.GetResponseFromUrl(
                 $"{_openWeatherMapUrl}{Uri.EscapeDataString(city)}&units=metric&appid={_openWeatherMapApiKey}",
                 Method.Post,
                 $"{nameof(GetWeatherAsync)}: Failed to fetch weather data for city '{city}'.");
@@ -56,7 +46,7 @@ namespace DiscordBot.Services
 
             JObject json = JObject.Parse(response.Content ?? "");
 
-            WeatherData weather = new WeatherData
+            WeatherData weather = new()
             {
                 City = json["name"]?.Value<string>(),
                 Description = json["weather"]?[0]?["description"]?.Value<string>(),

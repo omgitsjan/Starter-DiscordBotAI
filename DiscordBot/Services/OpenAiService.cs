@@ -6,12 +6,8 @@ using RestSharp;
 
 namespace DiscordBot.Services
 {
-    public class OpenAiService : IOpenAiService
+    public class OpenAiService(IHttpService httpService, IConfiguration configuration) : IOpenAiService
     {
-        private readonly IConfiguration _configuration;
-
-        private readonly IHttpService _httpService;
-
         /// <summary>
         ///     Url to the ChatGPT Api
         /// </summary>
@@ -20,18 +16,12 @@ namespace DiscordBot.Services
         /// <summary>
         ///     Url to the Dall-E Api
         /// </summary>
-        private string? _dalleApiUrl;
+        private string? _dallEApiUrl;
 
         /// <summary>
         ///     Api Key to access OpenAi Apis like ChatGPT
         /// </summary>
         private string? _openAiApiKey;
-
-        public OpenAiService(IHttpService httpService, IConfiguration configuration)
-        {
-            _httpService = httpService;
-            _configuration = configuration;
-        }
 
         /// <summary>
         ///     The method uses the RestClient class to send a request to the ChatGPT API, passing the user's message as the
@@ -48,8 +38,8 @@ namespace DiscordBot.Services
             bool success = false;
 
             // Retrieve the url and the apikey from the configuration
-            _openAiApiKey = _configuration["OpenAi:ApiKey"] ?? string.Empty;
-            _chatGptApiUrl = _configuration["OpenAi:ChatGPTApiUrl"] ?? string.Empty;
+            _openAiApiKey = configuration["OpenAi:ApiKey"] ?? string.Empty;
+            _chatGptApiUrl = configuration["OpenAi:ChatGPTApiUrl"] ?? string.Empty;
 
             if (string.IsNullOrEmpty(_openAiApiKey) || string.IsNullOrEmpty(_chatGptApiUrl))
             {
@@ -66,11 +56,11 @@ namespace DiscordBot.Services
                 return new Tuple<bool, string>(success, responseText.TrimStart('\n'));
             }
 
-            List<KeyValuePair<string, string>> headers = new()
-            {
+            List<KeyValuePair<string, string>> headers =
+            [
                 new KeyValuePair<string, string>("Content-Type", "application/json"),
                 new KeyValuePair<string, string>("Authorization", $"Bearer {_openAiApiKey}")
-            };
+            ];
 
             // Create the request data
             var data = new
@@ -81,10 +71,10 @@ namespace DiscordBot.Services
                 messages = new[] { new { role = "user", content = message } }
             };
 
-            HttpResponse response = await _httpService.GetResponseFromUrl(_chatGptApiUrl, Method.Post,
+            HttpResponse response = await httpService.GetResponseFromUrl(_chatGptApiUrl, Method.Post,
                 $"{nameof(ChatGptAsync)}: Unknown error occurred", headers, data);
 
-            if (response.IsSuccessStatusCode && response.Content != null)
+            if (response is { IsSuccessStatusCode: true, Content: not null })
             {
                 // Get the response text from the API
                 responseText =
@@ -122,10 +112,10 @@ namespace DiscordBot.Services
             bool success = false;
 
             // Retrieve the url and the apikey from the configuration
-            _openAiApiKey = _configuration["OpenAi:ApiKey"] ?? string.Empty;
-            _dalleApiUrl = _configuration["OpenAi:DallEApiUrl"] ?? string.Empty;
+            _openAiApiKey = configuration["OpenAi:ApiKey"] ?? string.Empty;
+            _dallEApiUrl = configuration["OpenAi:DallEApiUrl"] ?? string.Empty;
 
-            if (string.IsNullOrEmpty(_openAiApiKey) || string.IsNullOrEmpty(_dalleApiUrl))
+            if (string.IsNullOrEmpty(_openAiApiKey) || string.IsNullOrEmpty(_dallEApiUrl))
             {
                 const string errorMessage =
                     "No OpenAI Api Key/Url was provided, please contact the Developer to add a valid Api Key/Url!";
@@ -140,11 +130,11 @@ namespace DiscordBot.Services
                 return new Tuple<bool, string>(success, responseText.TrimStart('\n'));
             }
 
-            List<KeyValuePair<string, string>> headers = new()
-            {
+            List<KeyValuePair<string, string>> headers =
+            [
                 new KeyValuePair<string, string>("Content-Type", "application/json"),
                 new KeyValuePair<string, string>("Authorization", $"Bearer {_openAiApiKey}")
-            };
+            ];
 
             // Create the request data
             var data = new
@@ -156,12 +146,12 @@ namespace DiscordBot.Services
                 size = "1024x1024"
             };
 
-            HttpResponse response = await _httpService.GetResponseFromUrl(_dalleApiUrl, Method.Post,
+            HttpResponse response = await httpService.GetResponseFromUrl(_dallEApiUrl, Method.Post,
                 $"{nameof(DallEAsync)}: Received a failed response from the Dall-E API.", headers,
                 data);
 
             // Check the status code of the response
-            if (response.IsSuccessStatusCode && response.Content != null)
+            if (response is { IsSuccessStatusCode: true, Content: not null })
             {
                 // Get the image URL from the API response
                 dynamic? imageUrl = JsonConvert.DeserializeObject<dynamic>(response.Content)?["data"][0]["url"];

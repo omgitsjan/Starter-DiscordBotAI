@@ -1,101 +1,85 @@
-using DiscordBot.Interfaces;
 using DiscordBot.Services;
-using Microsoft.Extensions.Configuration;
-using Moq;
-using RestSharp;
+using Microsoft.Extensions.Logging;
 
-namespace DiscordBotTests.ServiceTests;
-
-[TestFixture]
-public class HelperServiceTests
+namespace DiscordBotTests.ServiceTests
 {
-    [SetUp]
-    public void Setup()
+    [TestFixture]
+    public class HelperServiceTests
     {
-        _mockHttpService = new Mock<IHttpService>();
+        private HelperService _helperService = null!;
+        private const string TestJsonFilePath = "testExcuses.json";
 
-        // Create an in-memory configuration for testing purposes
-        var configurationBuilder = new ConfigurationBuilder();
-        configurationBuilder.AddInMemoryCollection(new[]
+        [SetUp]
+        public void Setup()
         {
-            new KeyValuePair<string, string?>("ByBit:ApiUrlBtc", "https://api.bybit.com/v2/public/tickers"),
-            new KeyValuePair<string, string?>("DeveloperExcuse:ApiUrl", "https://dev-excuse-api.herokuapp.com/")
-        });
-        var configuration = configurationBuilder.Build();
+            // Create a test JSON file with some developer excuses
+            const string testJsonContent = "{\"en\": [\"Test excuse 1\", \"Test excuse 2\", \"Test excuse 3\"]}";
+            File.WriteAllText(TestJsonFilePath, testJsonContent);
+        }
 
-        _helperService = new HelperService(_mockHttpService.Object, configuration);
-    }
+        [TearDown]
+        public void Cleanup()
+        {
+            // Delete the test JSON file after each test
+            if (File.Exists(TestJsonFilePath))
+            {
+                File.Delete(TestJsonFilePath);
+            }
+        }
 
-    private Mock<IHttpService> _mockHttpService;
-    private HelperService _helperService;
+        [Test]
+        public async Task GetRandomDeveloperExcuseAsync_ReturnsRandomDeveloperExcuse()
+        {
+            //Arrange
+            _helperService = new HelperService(new Logger<HelperService>(new LoggerFactory()), TestJsonFilePath);
 
-    [Test]
-    public async Task GetRandomDeveloperExcuseAsync_ReturnsRandomDeveloperExcuse()
-    {
-        // Arrange
-        const string? jsonResponse = "{\"text\": \"It was a compiler issue.\"}";
-        const string expectedExcuse = "It was a compiler issue.";
+            // Act
+            var result = await _helperService.GetRandomDeveloperExcuseAsync();
 
-        _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
-            .ReturnsAsync(new HttpResponse(true, jsonResponse));
+            // Assert
+            Assert.That(result, Is.EqualTo("Test excuse 1").Or.EqualTo("Test excuse 2").Or.EqualTo("Test excuse 3"));
+        }
 
-        // Act
-        var result = await _helperService.GetRandomDeveloperExcuseAsync();
+        [Test]
+        public async Task GetRandomDeveloperExcuseAsync_InvalidJsonFile_ReturnsFallbackMessage()
+        {
+            // Arrange
+            await File.WriteAllTextAsync(TestJsonFilePath, "Invalid JSON");
+            _helperService = new HelperService(new Logger<HelperService>(new LoggerFactory()), TestJsonFilePath);
 
-        // Assert
-        Assert.That(result, Is.EqualTo(expectedExcuse));
-    }
+            // Act
+            var result = await _helperService.GetRandomDeveloperExcuseAsync();
 
-    [Test]
-    public async Task GetRandomDeveloperExcuseAsync_InvalidJson_ReturnsFallbackMessage()
-    {
-        // Arrange
-        const string? invalidJson = "Invalid JSON";
-        const string expectedFallbackMessage = "Could not fetch current Developer excuse...";
+            // Assert
+            Assert.That(result, Is.EqualTo("Could not fetch a Developer excuse. Please check the configuration."));
+        }
 
-        _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
-            .ReturnsAsync(new HttpResponse(true, invalidJson));
+        [Test]
+        public async Task GetRandomDeveloperExcuseAsync_EmptyJsonFile_ReturnsFallbackMessage()
+        {
+            // Arrange
+            await File.WriteAllTextAsync(TestJsonFilePath, "{}");
+            _helperService = new HelperService(new Logger<HelperService>(new LoggerFactory()), TestJsonFilePath);
 
-        // Act
-        var result = await _helperService.GetRandomDeveloperExcuseAsync();
+            // Act
+            var result = await _helperService.GetRandomDeveloperExcuseAsync();
 
-        // Assert
-        Assert.That(result, Is.EqualTo(expectedFallbackMessage));
-    }
+            // Assert
+            Assert.That(result, Is.EqualTo("Could not fetch a Developer excuse. Please check the configuration."));
+        }
 
-    [Test]
-    public async Task GetRandomDeveloperExcuseAsync_NoTextFieldInJson_ReturnsFallbackMessage()
-    {
-        // Arrange
-        const string? jsonResponse = "{\"not_text\": \"It was a compiler issue.\"}";
-        const string expectedFallbackMessage = "Could not fetch current Developer excuse...";
+        [Test]
+        public async Task GetRandomDeveloperExcuseAsync_NoJsonFile_ReturnsFallbackMessage()
+        {
+            // Arrange
+            File.Delete(TestJsonFilePath);
+            _helperService = new HelperService(new Logger<HelperService>(new LoggerFactory()), TestJsonFilePath);
 
-        _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
-            .ReturnsAsync(new HttpResponse(true, jsonResponse));
+            // Act
+            var result = await _helperService.GetRandomDeveloperExcuseAsync();
 
-        // Act
-        var result = await _helperService.GetRandomDeveloperExcuseAsync();
-
-        // Assert
-        Assert.That(result, Is.EqualTo(expectedFallbackMessage));
-    }
-
-    [Test]
-    public async Task GetRandomDeveloperExcuseAsync_NonSuccessStatusCode_ReturnsErrorMessage()
-    {
-        // Arrange
-        const string? errorMessage = "Error fetching data.";
-        _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
-                It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
-            .ReturnsAsync(new HttpResponse(false, errorMessage));
-
-        // Act
-        var result = await _helperService.GetRandomDeveloperExcuseAsync();
-
-        // Assert
-        Assert.That(result, Is.EqualTo(errorMessage));
+            // Assert
+            Assert.That(result, Is.EqualTo("Could not fetch a Developer excuse. Please check the configuration."));
+        }
     }
 }
