@@ -22,6 +22,6 @@ receiving such patches depends on the CVSS v3.1 Rating (only the latest minor ve
 ## Reporting a Vulnerability
 
 Please report (suspected) security vulnerabilities to
-**[security@jpprofessionals.de](mailto:info@jpprofessionals.de)**. You will receive a response from
+**[mail@janpetry.de](mailto:mail@janpetry.de)**. You will receive a response from
 me within 72 hours. If the issue is confirmed, we will release a patch as soon
 as possible depending on complexity but historically within a few days.
