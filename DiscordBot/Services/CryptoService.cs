@@ -3,27 +3,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
 
 namespace DiscordBot.Services
 {
-    public class CryptoService : ICryptoService
+    public class CryptoService(IHttpService httpService, IConfiguration configuration) : ICryptoService
     {
-        private readonly IConfiguration _configuration;
-
-        private readonly IHttpService _httpService;
-
         /// <summary>
         ///     Url to the Bitcoin Price Api
         /// </summary>
         private string? _byBitApiUrl;
-
-        public CryptoService(IHttpService httpService, IConfiguration configuration)
-        {
-            _httpService = httpService;
-            _configuration = configuration;
-        }
 
         /// <summary>
         ///     Gets the current Price of a given Cryptocurrency. Default = BTC & USDT
@@ -31,7 +19,7 @@ namespace DiscordBot.Services
         /// <returns>The current price of given Cryptocurrency as string</returns>
         public async Task<Tuple<bool, string>> GetCryptoPriceAsync(string symbol = "BTC", string physicalCurrency = "USDT")
         {
-            _byBitApiUrl = _configuration["ByBit:ApiUrl"] ?? string.Empty;
+            _byBitApiUrl = configuration["ByBit:ApiUrl"] ?? string.Empty;
             symbol = symbol.ToUpper();
             if (string.IsNullOrEmpty(_byBitApiUrl))
             {
@@ -43,7 +31,7 @@ namespace DiscordBot.Services
 
             string requestUrl = _byBitApiUrl + symbol + physicalCurrency;
             Console.WriteLine(requestUrl);
-            HttpResponse response = await _httpService.GetResponseFromUrl(requestUrl);
+            HttpResponse response = await httpService.GetResponseFromUrl(requestUrl);
 
             if (!response.IsSuccessStatusCode)
             {

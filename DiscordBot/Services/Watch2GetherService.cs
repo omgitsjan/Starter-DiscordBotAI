@@ -38,7 +38,7 @@ namespace DiscordBot.Services
             _w2GCreateRoomUrl = configuration["Watch2Gether:CreateRoomUrl"] ?? string.Empty;
             _w2GShowRoomUrl = configuration["Watch2Gether:ShowRoomUrl"] ?? string.Empty;
 
-            string? message = "";
+            string? message;
 
             if (string.IsNullOrEmpty(_w2GApiKey) || string.IsNullOrEmpty(_w2GCreateRoomUrl) ||
                 string.IsNullOrEmpty(_w2GShowRoomUrl))
