@@ -23,7 +23,7 @@ namespace DiscordBot
     {
         /// <summary>
         ///     This is the Discord token from the bot
-        /// </summary>
+        /// </summary> 
         private string? _discordToken;
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace DiscordBot
         /// <summary>
         ///     Init Program
         /// </summary>
-        public static Task Main(string[] args)
+        public static Task Main()
         {
             return new Program().MainAsync();
         }

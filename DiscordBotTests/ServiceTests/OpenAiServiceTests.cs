@@ -28,8 +28,8 @@ public class OpenAiServiceTests
         _openAiService = new OpenAiService(_mockHttpService.Object, configuration);
     }
 
-    private Mock<IHttpService> _mockHttpService;
-    private OpenAiService? _openAiService;
+    private Mock<IHttpService> _mockHttpService = null!;
+    private OpenAiService? _openAiService = null!;
 
     [Test]
     public async Task ChatGpt_WithValidApiKeyAndMessage_ReturnsSuccessAndResponse()

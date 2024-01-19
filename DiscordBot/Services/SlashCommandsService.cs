@@ -271,7 +271,7 @@ namespace DiscordBot.Services
             Program.Log("Message: " + message);
 
             if (success) {
-                DiscordEmbedBuilder embedMessage = new DiscordEmbedBuilder
+                DiscordEmbedBuilder embedMessage = new()
                 {
                     Title = $"{symbol} - {physicalCurrency} | ${message}",
                     Description = $"Price of {symbol} - {physicalCurrency} is ${message}",

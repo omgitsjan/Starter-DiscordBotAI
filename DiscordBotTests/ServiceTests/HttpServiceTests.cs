@@ -17,8 +17,8 @@ public class HttpServiceTests
         _httpService = new HttpService(_mockRestClient.Object);
     }
 
-    private Mock<IRestClient> _mockRestClient;
-    private IHttpService _httpService;
+    private Mock<IRestClient> _mockRestClient = null!;
+    private IHttpService _httpService = null!;
 
     [Test]
     public async Task GetResponseFromURL_WithValidResponse_ReturnsSuccess()

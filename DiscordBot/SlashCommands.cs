@@ -61,7 +61,7 @@ namespace DiscordBot
             [Option("PhysicalCurrency", "The physical currency to compare against, e.g., USDT")]
             string physicalCurrency = "USDT")
         {
-            InteractionContextWrapper context = new InteractionContextWrapper(ctx);
+            InteractionContextWrapper context = new(ctx);
             await slashCommandsService.CryptoSlashCommandAsync(context, symbol, physicalCurrency);
         }
     }

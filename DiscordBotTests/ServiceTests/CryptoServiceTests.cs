@@ -31,8 +31,8 @@ public class CryptoServiceTests
     public async Task GetCurrentCryptoPriceAsync_ReturnsCurrentPrice()
     {
         // Arrange
-        string symbol = "BTC";
-        string physicalCurrency = "USDT";
+        const string symbol = "BTC";
+        const string physicalCurrency = "USDT";
         const string jsonResponse = "{\"result\": [{\"last_price\": \"50000\"}]}";
         const string expectedPrice = "50000";
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
@@ -51,8 +51,8 @@ public class CryptoServiceTests
     public async Task GetCurrentCryptoPriceAsync_ApiError_ReturnsErrorMessage()
     {
         // Arrange
-        string symbol = "BTC";
-        string physicalCurrency = "USDT";
+        const string symbol = "BTC";
+        const string physicalCurrency = "USDT";
         const string expectedErrorMessage = "API Error";
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
                 It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
@@ -70,8 +70,8 @@ public class CryptoServiceTests
     public async Task GetCurrentCryptoPriceAsync_InvalidJson_ReturnsFallbackMessage()
     {
         // Arrange
-        string symbol = "BTC";
-        string physicalCurrency = "USDT";
+        const string symbol = "BTC";
+        const string physicalCurrency = "USDT";
         const string invalidJsonResponse = "Invalid JSON";
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
                 It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))
@@ -89,8 +89,8 @@ public class CryptoServiceTests
     public async Task GetCurrentCryptoPriceAsync_MissingLastPrice_ReturnsFallbackMessage()
     {
         // Arrange
-        string symbol = "BTC";
-        string physicalCurrency = "USDT";
+        const string symbol = "BTC";
+        const string physicalCurrency = "USDT";
         const string jsonResponseMissingLastPrice = "{\"result\": [{}]}";
         _mockHttpService.Setup(x => x.GetResponseFromUrl(It.IsAny<string>(), It.IsAny<Method>(), It.IsAny<string>(),
                 It.IsAny<List<KeyValuePair<string, string>>>(), It.IsAny<object>()))

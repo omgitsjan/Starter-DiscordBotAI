@@ -10,13 +10,13 @@ namespace DiscordBotTests.ServiceTests;
 [Ignore("This test is not yet implemented. Currently, I don't know exactly how to properly mock the DiscordUser & DiscordChannel.")]
 public class SlashCommandsServiceTests
 {
-    private Mock<IInteractionContextWrapper> _ctxMock;
-    private Mock<IOpenAiService> _openAiServiceMock;
-    private Mock<IOpenWeatherMapService> _openWeatherMapServiceMock;
-    private SlashCommandsService _slashCommandsService;
-    private Mock<IWatch2GetherService> _watch2GetherServiceMock;
-    private Mock<ICryptoService> _cryptoServiceMock;
-
+    private Mock<IInteractionContextWrapper> _ctxMock = null!;
+    private Mock<IOpenAiService> _openAiServiceMock = null!;
+    private Mock<IOpenWeatherMapService> _openWeatherMapServiceMock = null!;
+    private SlashCommandsService _slashCommandsService = null!;
+    private Mock<IWatch2GetherService> _watch2GetherServiceMock = null!;
+    private Mock<ICryptoService> _cryptoServiceMock = null!;
+        
     [SetUp]
     public void Setup()
     {

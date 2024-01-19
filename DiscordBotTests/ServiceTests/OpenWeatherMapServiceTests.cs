@@ -29,8 +29,8 @@ public class OpenWeatherMapServiceTests
         _openWeatherMapService = new OpenWeatherMapService(_mockHttpService.Object, configuration);
     }
 
-    private Mock<IHttpService> _mockHttpService;
-    private OpenWeatherMapService _openWeatherMapService;
+    private Mock<IHttpService> _mockHttpService = null!;
+    private OpenWeatherMapService _openWeatherMapService = null!;
 
     [Test]
     public void GetWeatherAsync_WithValidApiKeyAndCity_ReturnsSuccessAndWeatherData()

@@ -29,8 +29,8 @@ public class Watch2GetherServiceTests
         _watch2GetherService = new Watch2GetherService(_mockHttpService.Object, configuration);
     }
 
-    private Watch2GetherService _watch2GetherService;
-    private Mock<IHttpService> _mockHttpService;
+    private Watch2GetherService _watch2GetherService = null!;
+    private Mock<IHttpService> _mockHttpService = null!;
 
     [Test]
     public async Task CreateRoom_SuccessfulRequest_ReturnsSuccessAndRoomUrl()
