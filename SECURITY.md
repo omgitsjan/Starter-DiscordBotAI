@@ -16,8 +16,8 @@ receiving such patches depends on the CVSS v3.1 Rating (only the latest minor ve
 
 | CVSS v3.1       | Supported Versions   |
 | --------------- | -------------------- |
-| 3.2.x           | :white_check_mark:   |
-| 3.1.x and below | :x:                  |
+| Latest Version  | :white_check_mark:   |
+| Below           | :x:                  |
 
 ## Reporting a Vulnerability
 
