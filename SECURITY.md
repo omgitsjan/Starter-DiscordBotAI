@@ -14,10 +14,10 @@
 We release patches for security vulnerabilities. Which versions are eligible for
 receiving such patches depends on the CVSS v3.1 Rating (only the latest minor version):
 
-| CVSS v3.1       | Supported Versions   |
-| --------------- | -------------------- |
-| Latest Version  | :white_check_mark:   |
-| Below           | :x:                  |
+| CVSS v3.1      | Supported Versions |
+| -------------- | ------------------ |
+| Latest Version | :white_check_mark: |
+| Below          | :x:                |
 
 ## Reporting a Vulnerability
 
