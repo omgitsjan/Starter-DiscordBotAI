@@ -30,7 +30,7 @@ namespace DiscordBot.Services
             }
 
             string requestUrl = _byBitApiUrl + symbol + physicalCurrency;
-            Console.WriteLine(requestUrl);
+            Console.WriteLine("Sending Reqeust to: " + requestUrl);
             HttpResponse response = await httpService.GetResponseFromUrl(requestUrl);
 
             if (!response.IsSuccessStatusCode)
@@ -41,7 +41,7 @@ namespace DiscordBot.Services
             try
             {
                 JObject json = JObject.Parse(response.Content ?? "{}");
-                string? respString = json["result"]?[0]?["last_price"]?.Value<string>();
+                string? respString = json["result"]?["list"]?[0]?["lastPrice"]?.Value<string>();
                 bool success = respString != null;
 
                 if (!success)
