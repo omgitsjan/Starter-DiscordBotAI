@@ -4,19 +4,19 @@
   "timezone": "Europe/Berlin",
   "packageRules": [
     {
-      "updateTypes": ["patch"],
+      "matchUpdateTypes": ["patch"],
       "groupName": "patch updates",
       "groupSlug": "patch-updates",
       "automerge": true,
       "automergeType": "branch"
     },
     {
-      "updateTypes": ["minor"],
+      "matchUpdateTypes": ["minor"],
       "groupName": "minor updates",
       "groupSlug": "minor-updates"
     },
     {
-      "managers": ["npm"],
+      "matchManagers": ["npm"],
       "assignees": ["omgitsjan"],
       "reviewers": ["omgitsjan"],
       "matchUpdateTypes": ["minor", "major", "patch"]
